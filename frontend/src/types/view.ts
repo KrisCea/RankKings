@@ -1,0 +1,1 @@
+export type FeedViewMode = "posts" | "reels" | "gallery";

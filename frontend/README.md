@@ -48,3 +48,39 @@ Corre en `http://localhost:5173`
 Copia `.env.example` a `.env` dentro de `frontend/` y completa los valores:
 
 VITE_API_URL=http://localhost:8080/api
+
+
+### Paleta de colores:
+
+Esta paleta está diseñada para mantener un equilibrio elegante y un contraste accesible, adaptando el morado según el tema y reservando el dorado para interacciones clave.
+
+## Modo Claro
+
+| Elemento UI | Color (Hex) | Uso y Fundamento |
+| :--- | :--- | :--- |
+| **Fondo Principal** | `#FBFBFE` | Blanco con matiz púrpura (1%). Unifica térmicamente sin cansar la vista. |
+| **Superficies** | `#FFFFFF` | Blanco puro. Crea elevación en tarjetas y separaciones naturales. |
+| **Texto Principal** | `#1A1625` | Púrpura casi negro. Reduce la fatiga visual frente al negro `#000000`. |
+| **Primario** | `#6B46C1` | Morado sólido. Alto contraste sobre claro; ideal para headers o enlaces. |
+| **Acento** | `#D69E2E` | Dorado ocre oscuro. Muy legible para botones secundarios o etiquetas. |
+
+## Modo Oscuro
+
+| Elemento UI | Color (Hex) | Uso y Fundamento |
+| :--- | :--- | :--- |
+| **Fondo Principal** | `#13111C` | Púrpura profundo casi negro. Brinda una sensación *premium*. |
+| **Superficies** | `#1E1B2E` | Tono más claro que el fondo para modales, tarjetas y jerarquía. |
+| **Texto Principal** | `#E2E8F0` | Gris azulado. Previene el deslumbramiento del blanco puro `#FFFFFF`. |
+| **Primario** | `#9F7AEA` | Morado pastel desaturado. No "vibra" en la pantalla oscura. |
+| **Acento** | `#ECC94B` | Dorado brillante. Foco de atención perfecto para botones CTA. |
+
+---
+
+
+
+
+
+### FUTURO:
+
+Conectar con backend:
+La idea es que los componentes nunca llamen directo a mocks o a axios — siempre pasan por un hook (useX()), y ese hook es el único que sabe de dónde vienen los datos. Así, cuando se conecte el backend, solo se cambia el archivo de la función api.ts respectiva, nada en los componentes cambia.
