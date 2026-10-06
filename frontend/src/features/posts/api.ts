@@ -67,6 +67,7 @@ export async function ratePost(postId: string, score: number): Promise<Post> {
   const { data } = await api.put<Post>(`/posts/${postId}/rating`, { score });
   return data;
 }
+
 export async function unratePost(postId: string): Promise<Post> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 150));
@@ -94,5 +95,17 @@ export async function unratePost(postId: string): Promise<Post> {
 
   // BACKEND: se espera que el endpoint elimine el rating del usuario y devuelva el post actualizado
   const { data } = await api.delete<Post>(`/posts/${postId}/rating`);
+  return data;
+}
+
+export async function getFeaturedPosts(): Promise<Post[]> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 300));
+    // MOCK: "destacado" = mejor puntuados. El backend real decidirá esto
+    // con su propio criterio/algoritmo sin que el frontend cambie.
+    return [...mockPostsState].sort((a, b) => b.averageRating - a.averageRating);
+  }
+
+  const { data } = await api.get<Post[]>("/posts/featured");
   return data;
 }

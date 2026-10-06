@@ -5,6 +5,7 @@ import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
 import PostCard from "../../features/posts/components/PostCard";
 import ViewTabs from "../../features/posts/components/ViewTabs";
+import FeaturedCarousel from "../../features/posts/components/FeaturedCarousel";
 import type { FeedViewMode } from "../../types/view";
 
 export default function Home() {
@@ -16,6 +17,8 @@ export default function Home() {
 
   return (
     <div className="max-w-xl mx-auto">
+      <FeaturedCarousel />
+
       <ViewTabs active={viewMode} onChange={setViewMode} />
 
       {viewMode === "posts" && (
