@@ -8,6 +8,7 @@ interface PostActionsProps {
   post: Post;
   onToggleVote: () => void;
   onRate: (score: number) => void;
+  onUnrate: () => void;
   onOpenComments: () => void;
   onOpenShare: () => void;
 }
@@ -16,6 +17,7 @@ export default function PostActions({
   post,
   onToggleVote,
   onRate,
+  onUnrate,
   onOpenComments,
   onOpenShare,
 }: PostActionsProps) {
@@ -50,7 +52,11 @@ export default function PostActions({
         <RatingBadge averageRating={post.averageRating} ratingsCount={post.ratingsCount} />
       </div>
 
-      <RatingControl currentUserRating={post.currentUserRating} onRate={onRate} />
+      <RatingControl
+        currentUserRating={post.currentUserRating}
+        onRate={onRate}
+        onUnrate={onUnrate}
+      />
     </div>
   );
 }

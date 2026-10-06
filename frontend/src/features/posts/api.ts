@@ -67,3 +67,32 @@ export async function ratePost(postId: string, score: number): Promise<Post> {
   const { data } = await api.put<Post>(`/posts/${postId}/rating`, { score });
   return data;
 }
+export async function unratePost(postId: string): Promise<Post> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 150));
+    const index = mockPostsState.findIndex((p) => p.id === postId);
+    if (index === -1) throw new Error("Post no encontrado");
+
+    const post = mockPostsState[index];
+    if (post.currentUserRating === undefined) return post; // no había puntuado
+
+    const newRatingsCount = Math.max(post.ratingsCount - 1, 0);
+    const totalBefore = post.averageRating * post.ratingsCount;
+    const totalAfter = totalBefore - post.currentUserRating;
+    const newAverage = newRatingsCount > 0 ? totalAfter / newRatingsCount : 0;
+
+    const updated: Post = {
+      ...post,
+      currentUserRating: undefined,
+      ratingsCount: newRatingsCount,
+      averageRating: Number(newAverage.toFixed(1)),
+    };
+
+    mockPostsState[index] = updated;
+    return updated;
+  }
+
+  // BACKEND: se espera que el endpoint elimine el rating del usuario y devuelva el post actualizado
+  const { data } = await api.delete<Post>(`/posts/${postId}/rating`);
+  return data;
+}

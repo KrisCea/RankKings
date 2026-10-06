@@ -8,6 +8,7 @@ interface PostCardProps {
   post: Post;
   onToggleVote: (postId: string) => void;
   onRate: (postId: string, score: number) => void;
+  onUnrate: (postId: string) => void;
   onOpenComments: (postId: string) => void;
   onOpenShare: (postId: string) => void;
 }
@@ -16,6 +17,7 @@ export default function PostCard({
   post,
   onToggleVote,
   onRate,
+  onUnrate,
   onOpenComments,
   onOpenShare,
 }: PostCardProps) {
@@ -68,6 +70,7 @@ export default function PostCard({
           post={post}
           onToggleVote={() => onToggleVote(post.id)}
           onRate={(score) => onRate(post.id, score)}
+          onUnrate={() => onUnrate(post.id)}
           onOpenComments={() => onOpenComments(post.id)}
           onOpenShare={() => onOpenShare(post.id)}
         />
