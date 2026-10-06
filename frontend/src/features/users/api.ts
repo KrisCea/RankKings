@@ -1,7 +1,7 @@
 import { api } from "../../lib/axios";
-import { mockCurrentUser } from "../../mocks/users";
 import { mockUserProfiles } from "../../mocks/userProfiles";
-import type { User, UserProfile } from "../../types/user";
+import { mockCurrentUser, mockUsers } from "../../mocks/users";
+import type { User, UserProfile, UserSummary } from "../../types/user";
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
 
@@ -56,5 +56,16 @@ export async function toggleFollow(username: string): Promise<UserProfile> {
 
   // BACKEND: alterna seguir/dejar de seguir. Debe responder error si el objetivo es el propio usuario.
   const { data } = await api.post<UserProfile>(`/users/${username}/follow`);
+  return data;
+}
+
+export async function getShareContacts(): Promise<UserSummary[]> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 200));
+    return mockUsers;
+  }
+
+  // BACKEND: el servidor decide quiénes aparecen (seguidores, chats recientes, etc.)
+  const { data } = await api.get<UserSummary[]>("/users/me/share-contacts");
   return data;
 }

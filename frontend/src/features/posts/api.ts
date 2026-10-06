@@ -109,3 +109,23 @@ export async function getFeaturedPosts(): Promise<Post[]> {
   const { data } = await api.get<Post[]>("/posts/featured");
   return data;
 }
+
+export async function sharePost(postId: string, recipientId: string): Promise<Post> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 150));
+    const index = mockPostsState.findIndex((p) => p.id === postId);
+    if (index === -1) throw new Error("Post no encontrado");
+
+    const updated: Post = {
+      ...mockPostsState[index],
+      sharesCount: mockPostsState[index].sharesCount + 1,
+    };
+
+    mockPostsState[index] = updated;
+    return updated;
+  }
+
+  // BACKEND: envía el post al destinatario (p. ej. como mensaje de chat) y devuelve el post con sharesCount actualizado
+  const { data } = await api.post<Post>(`/posts/${postId}/share`, { recipientId });
+  return data;
+}

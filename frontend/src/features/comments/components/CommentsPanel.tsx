@@ -66,7 +66,7 @@ export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
         aria-hidden="true"
       />
 
-      <div className="relative w-full md:max-w-xl h-[85vh] md:h-[720px] max-h-[90vh] bg-background rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full md:max-w-xl h-[85vh] md:h-180 max-h-[90vh] bg-background rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-foreground/10 p-4">
           <h2 className="font-semibold text-foreground">Comentarios</h2>
           <button
