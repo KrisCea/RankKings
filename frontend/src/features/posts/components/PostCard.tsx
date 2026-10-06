@@ -3,6 +3,7 @@ import PostActions from "./PostActions";
 import VerificationBadge from "./VerificationBadge";
 import type { Post } from "../../../types/post";
 import Avatar from "../../../components/ui/Avatar";
+import UserHoverCard from "../../users/components/UserHoverCard";
 
 interface PostCardProps {
   post: Post;
@@ -28,16 +29,20 @@ export default function PostCard({
     >
       {/* Header: autor */}
       <div className="flex items-center gap-3 p-4">
-        <Avatar src={post.author.avatarUrl} alt={post.author.displayName} size={36} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">
-            {post.author.displayName}
-            {post.author.isVerifiedBusiness && (
-              <span className="ml-1 text-primary text-xs">●</span>
-            )}
-          </p>
-          <p className="text-xs text-foreground/50">@{post.author.username}</p>
-        </div>
+        <UserHoverCard username={post.author.username}>
+          <Avatar src={post.author.avatarUrl} alt={post.author.displayName} size={36} />
+        </UserHoverCard>
+        <UserHoverCard username={post.author.username}>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {post.author.displayName}
+              {post.author.isVerifiedBusiness && (
+                <span className="ml-1 text-primary text-xs">●</span>
+              )}
+            </p>
+            <p className="text-xs text-foreground/50">@{post.author.username}</p>
+          </div>
+        </UserHoverCard>
       </div>
 
       {/* Media */}

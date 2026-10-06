@@ -6,10 +6,13 @@ import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
 import PostCard from "../../features/posts/components/PostCard";
 import ViewTabs from "../../features/posts/components/ViewTabs";
 import FeaturedCarousel from "../../features/posts/components/FeaturedCarousel";
+import CommentsPanel from "../../features/comments/components/CommentsPanel";
 import type { FeedViewMode } from "../../types/view";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<FeedViewMode>("posts");
+  const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null);
+
   const { data: posts, isLoading } = usePosts();
   const toggleVote = useToggleVote();
   const ratePost = useRatePost();
@@ -31,7 +34,7 @@ export default function Home() {
               onToggleVote={(id) => toggleVote.mutate(id)}
               onRate={(id, score) => ratePost.mutate({ postId: id, score })}
               onUnrate={(id) => unratePost.mutate(id)}
-              onOpenComments={(id) => console.log("comments", id)}
+              onOpenComments={(id) => setActiveCommentsPostId(id)}
               onOpenShare={(id) => console.log("share", id)}
             />
           ))}
@@ -39,16 +42,17 @@ export default function Home() {
       )}
 
       {viewMode === "reels" && (
-        <p className="text-foreground/60 text-center py-12">
-          Vista de Reels — próximamente
-        </p>
+        <p className="text-foreground/60 text-center py-12">Vista de Reels — próximamente</p>
       )}
 
       {viewMode === "gallery" && (
-        <p className="text-foreground/60 text-center py-12">
-          Vista de Galería — próximamente
-        </p>
+        <p className="text-foreground/60 text-center py-12">Vista de Galería — próximamente</p>
       )}
+
+      <CommentsPanel
+        postId={activeCommentsPostId}
+        onClose={() => setActiveCommentsPostId(null)}
+      />
     </div>
   );
 }

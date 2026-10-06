@@ -29,7 +29,7 @@ export default function RatingControl({
   }
 
   return (
-    <div className="flex items-center gap-2 w-full max-w-[180px]">
+    <div className="flex items-center gap-2 w-full max-w-45">
       <input
         type="range"
         min={1}

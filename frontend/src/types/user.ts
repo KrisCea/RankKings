@@ -14,3 +14,11 @@ export interface User extends UserSummary {
   isAuthenticated: boolean;
   role: UserRole;
 }
+
+export interface UserProfile extends UserSummary {
+  bio?: string;
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  isFollowedByCurrentUser: boolean;
+}
