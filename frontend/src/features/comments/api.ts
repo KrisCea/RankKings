@@ -1,5 +1,6 @@
 import { api } from "../../lib/axios";
 import { mockComments as initialMockComments } from "../../mocks/comments";
+import { getMockSessionUser } from "../../mocks/accounts";
 import type { Comment, NewCommentInput } from "../../types/comment";
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
@@ -23,16 +24,16 @@ export async function getComments(postId: string): Promise<Comment[]> {
 export async function addComment(postId: string, input: NewCommentInput): Promise<Comment> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 200));
+
+    const me = getMockSessionUser();
+    if (!me) throw new Error("Debes iniciar sesión para comentar");
+
     const newComment: Comment = {
       id: `c${Date.now()}`,
       postId,
       parentId: input.parentId,
       replyToUsername: input.replyToUsername,
-      author: {
-        id: "1",
-        username: "crisc",
-        avatarUrl: "https://ui-avatars.com/api/?name=Cristobal&background=6366f1&color=fff",
-      },
+      author: { id: me.id, username: me.username, avatarUrl: me.avatarUrl },
       text: input.text,
       likesCount: 0,
       likedByCurrentUser: false,
@@ -42,7 +43,8 @@ export async function addComment(postId: string, input: NewCommentInput): Promis
     return newComment;
   }
 
-  // BACKEND: el autor se resuelve desde la sesión. Body: { text, parentId?, replyToUsername? }
+  // BACKEND: el autor se resuelve desde la sesión (nunca se envía desde el frontend).
+  // Body: { text, parentId?, replyToUsername? }. Sin sesión: 401.
   const { data } = await api.post<Comment>(`/posts/${postId}/comments`, input);
   return data;
 }

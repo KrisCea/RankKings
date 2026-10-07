@@ -60,7 +60,7 @@ export default function FeaturedCarousel() {
 
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none"
       >
         {posts.map((post) => (
           <Link
