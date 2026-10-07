@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { sharePost } from "../api";
-import type { Post } from "../../../types/post";
+import { syncPostInCache } from "../cache";
 
 interface ShareParams {
   postId: string;
@@ -12,11 +12,6 @@ export function useSharePost() {
 
   return useMutation({
     mutationFn: ({ postId, recipientId }: ShareParams) => sharePost(postId, recipientId),
-
-    onSuccess: (updatedPost: Post) => {
-      queryClient.setQueryData<Post[]>(["posts"], (old) =>
-        old?.map((post) => (post.id === updatedPost.id ? updatedPost : post))
-      );
-    },
+    onSuccess: (updatedPost) => syncPostInCache(queryClient, updatedPost),
   });
 }

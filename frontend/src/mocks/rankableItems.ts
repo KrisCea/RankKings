@@ -1,53 +1,157 @@
 import type { RankableItem } from "../types/rankableItem";
 import { mockCreators } from "./creators";
 
+const RAM_COVER = "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg";
+
 export const mockRankableItems: RankableItem[] = [
   {
     id: "ri1",
     category: "movies",
     title: "Oppenheimer",
-    creator: mockCreators[0], // Christopher Nolan
-    uploadedBy: "2", // Ana
+    description:
+      "Biopic sobre J. Robert Oppenheimer y el desarrollo de la bomba atómica durante la Segunda Guerra Mundial.",
+    creator: mockCreators[0],
+    uploadedBy: "2",
     year: 2023,
     coverUrl: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
     identifiers: { imdbId: "tt15398776" },
     verificationStatus: "verified",
+    postId: "p1",
+    averageRating: 8.9,
+    ratingsCount: 214,
+    childrenCount: 0,
+    externalLinks: [
+      { id: "l1", label: "Apple TV", url: "https://tv.apple.com", type: "streaming" },
+      { id: "l2", label: "IMDb", url: "https://www.imdb.com/title/tt15398776/", type: "other" },
+    ],
     createdAt: "2026-09-20T10:00:00Z",
   },
   {
     id: "ri2",
     category: "music",
     title: "Random Access Memories",
-    creator: mockCreators[1], // Daft Punk
-    uploadedBy: "3", // Sony Music
+    description: "Cuarto álbum de estudio de Daft Punk, publicado en 2013.",
+    creator: mockCreators[1],
+    uploadedBy: "3",
     year: 2013,
-    coverUrl: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+    coverUrl: RAM_COVER,
     identifiers: { isrc: "FR-ZYX-13-00001", genre: "Electrónica" },
     verificationStatus: "verified",
+    postId: "p2",
+    averageRating: 9.2,
+    ratingsCount: 401,
+    childrenCount: 3,
+    childrenAverageRating: 9.1, // MOCK: lo calculará el backend
+    externalLinks: [
+      { id: "l3", label: "Spotify", url: "https://open.spotify.com", type: "streaming" },
+      { id: "l4", label: "Discogs", url: "https://www.discogs.com", type: "store" },
+    ],
     createdAt: "2026-09-18T15:30:00Z",
   },
   {
     id: "ri3",
     category: "books",
     title: "Cien años de soledad",
-    creator: mockCreators[2], // García Márquez
-    uploadedBy: "4", // Pedro
+    description:
+      "Novela de Gabriel García Márquez que sigue a siete generaciones de la familia Buendía en Macondo.",
+    creator: mockCreators[2],
+    uploadedBy: "4",
     year: 1967,
-    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Gabriel_Garcia_Marquez_Cien_anos_de_soledad.jpg",
+    coverUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/4/4f/Gabriel_Garcia_Marquez_Cien_anos_de_soledad.jpg",
     identifiers: { isbn: "9780307474728" },
     verificationStatus: "verified",
+    postId: "p3",
+    averageRating: 9.5,
+    ratingsCount: 150,
+    childrenCount: 0,
+    externalLinks: [
+      { id: "l5", label: "Open Library", url: "https://openlibrary.org", type: "other" },
+      { id: "l6", label: "Amazon", url: "https://www.amazon.com", type: "store" },
+    ],
     createdAt: "2026-09-15T09:00:00Z",
   },
   {
     id: "ri4",
     category: "art",
     title: "La noche estrellada",
-    creator: mockCreators[3], // Van Gogh
-    uploadedBy: "1", // el usuario actual
+    description: "Óleo sobre lienzo pintado por Vincent van Gogh en junio de 1889.",
+    creator: mockCreators[3],
+    uploadedBy: "1",
     year: 1889,
-    coverUrl: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+    coverUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
     identifiers: {},
     verificationStatus: "partial",
+    postId: "p4",
+    averageRating: 8.7,
+    ratingsCount: 98,
+    childrenCount: 0,
+    externalLinks: [
+      { id: "l7", label: "Google Arts & Culture", url: "https://artsandculture.google.com", type: "other" },
+      { id: "l8", label: "MoMA", url: "https://www.moma.org", type: "other" },
+    ],
     createdAt: "2026-09-22T12:00:00Z",
+  },
+
+  // ---- Canciones de Random Access Memories (hijos de ri2) ----
+  {
+    id: "ri5",
+    category: "music",
+    title: "Give Life Back to Music",
+    creator: mockCreators[1],
+    uploadedBy: "3",
+    year: 2013,
+    coverUrl: RAM_COVER,
+    identifiers: { genre: "Electrónica" },
+    verificationStatus: "partial",
+    postId: "p7",
+    averageRating: 8.6,
+    ratingsCount: 96,
+    parentId: "ri2",
+    position: 1,
+    childrenCount: 0,
+    externalLinks: [],
+    createdAt: "2026-09-18T15:31:00Z",
+  },
+  {
+    id: "ri6",
+    category: "music",
+    title: "Instant Crush",
+    creator: mockCreators[1],
+    uploadedBy: "3",
+    year: 2013,
+    coverUrl: RAM_COVER,
+    identifiers: { genre: "Electrónica" },
+    verificationStatus: "partial",
+    postId: "p8",
+    averageRating: 9.0,
+    ratingsCount: 88,
+    parentId: "ri2",
+    position: 5,
+    childrenCount: 0,
+    externalLinks: [],
+    createdAt: "2026-09-18T15:32:00Z",
+  },
+  {
+    id: "ri7",
+    category: "music",
+    title: "Get Lucky",
+    creator: mockCreators[1],
+    uploadedBy: "3",
+    year: 2013,
+    coverUrl: RAM_COVER,
+    identifiers: { genre: "Electrónica" },
+    verificationStatus: "partial",
+    postId: "p9",
+    averageRating: 9.7,
+    ratingsCount: 310,
+    parentId: "ri2",
+    position: 8,
+    childrenCount: 0,
+    externalLinks: [
+      { id: "l9", label: "Spotify", url: "https://open.spotify.com", type: "streaming" },
+    ],
+    createdAt: "2026-09-18T15:33:00Z",
   },
 ];

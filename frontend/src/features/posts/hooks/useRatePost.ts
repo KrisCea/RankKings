@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ratePost } from "../api";
-import type { Post } from "../../../types/post";
+import { syncPostInCache } from "../cache";
 
 interface RateParams {
   postId: string;
@@ -12,11 +12,6 @@ export function useRatePost() {
 
   return useMutation({
     mutationFn: ({ postId, score }: RateParams) => ratePost(postId, score),
-
-    onSuccess: (updatedPost: Post) => {
-      queryClient.setQueryData<Post[]>(["posts"], (old) =>
-        old?.map((post) => (post.id === updatedPost.id ? updatedPost : post))
-      );
-    },
+    onSuccess: (updatedPost) => syncPostInCache(queryClient, updatedPost),
   });
 }

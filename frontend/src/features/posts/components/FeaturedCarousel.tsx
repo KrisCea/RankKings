@@ -65,16 +65,16 @@ export default function FeaturedCarousel() {
         {posts.map((post) => (
           <Link
             key={post.id}
-            to={`/${post.category}`}
+            to={`/item/${post.rankableItem.id}`}
             data-theme={post.category}
-            className="relative shrink-0 w-full aspect-[16/9] rounded-xl overflow-hidden snap-start"
+            className="relative shrink-0 w-full aspect-video rounded-xl overflow-hidden snap-start"
           >
             <img
-              src={post.media[0]?.url}
+              src={post.media[0]?.url ?? post.rankableItem.coverUrl}
               alt={post.rankableItem.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="flex items-center gap-1 text-xs text-white/90 mb-1">

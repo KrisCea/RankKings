@@ -4,7 +4,9 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import Profile from "../pages/Profile/Profile";
 import MovieDetail from "../pages/MovieDetail/MovieDetail";
+import PostPage from "../pages/PostPage/PostPage";
 import RootLayout from "../components/layout/RootLayout";
+import ItemPage from "../pages/ItemPage/ItemPage";
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +18,8 @@ export const router = createBrowserRouter([
       { path: "register", element: <Register /> },
       { path: "profile/:username", element: <Profile /> },
       { path: "movie/:id", element: <MovieDetail /> },
+      { path: "post/:id", element: <PostPage /> },
+      { path: "item/:id", element: <ItemPage /> },
     ],
   },
 ]);

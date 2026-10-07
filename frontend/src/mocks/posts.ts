@@ -5,8 +5,9 @@ import { mockCurrentUser, mockUsers } from "./users";
 export const mockPosts: Post[] = [
   {
     id: "p1",
+    kind: "item",
     category: "movies",
-    author: mockUsers[0], // Ana
+    author: mockUsers[0],
     caption: "Una obra maestra sobre el peso de la responsabilidad científica.",
     media: [
       {
@@ -29,8 +30,9 @@ export const mockPosts: Post[] = [
   },
   {
     id: "p2",
+    kind: "item",
     category: "music",
-    author: mockUsers[1], // Sony Music
+    author: mockUsers[1],
     caption: "El disco que redefinió la música electrónica moderna.",
     media: [
       {
@@ -53,8 +55,9 @@ export const mockPosts: Post[] = [
   },
   {
     id: "p3",
+    kind: "item",
     category: "books",
-    author: mockUsers[2], // Pedro
+    author: mockUsers[2],
     caption: "Realismo mágico en su máxima expresión.",
     media: [
       {
@@ -77,6 +80,7 @@ export const mockPosts: Post[] = [
   },
   {
     id: "p4",
+    kind: "item",
     category: "art",
     author: mockCurrentUser,
     caption: "Un ícono del post-impresionismo.",
@@ -97,6 +101,123 @@ export const mockPosts: Post[] = [
     sharesCount: 6,
     moderationStatus: "approved",
     createdAt: "2026-09-22T12:10:00Z",
+    isReelEligible: false,
+  },
+  {
+    id: "p5",
+    kind: "review",
+    category: "movies",
+    author: mockUsers[2],
+    caption:
+      "Nolan consigue que tres horas de conversaciones se sientan como un thriller. El sonido y el montaje son lo mejor de la película. El tramo final podría ser más corto, pero es un detalle menor frente a lo que logra.",
+    media: [],
+    rankableItem: mockRankableItems[0],
+    review: { authorScore: 9.0 },
+    votesCount: 41,
+    votedByCurrentUser: false,
+    averageRating: 7.8,
+    ratingsCount: 36,
+    currentUserRating: undefined,
+    commentsCount: 8,
+    sharesCount: 2,
+    moderationStatus: "approved",
+    createdAt: "2026-09-23T09:00:00Z",
+    isReelEligible: false,
+  },
+  {
+    id: "p6",
+    kind: "review",
+    category: "music",
+    author: mockUsers[0],
+    caption:
+      "Un disco que envejece mejor que casi cualquier otro de su década. La producción se escucha hoy tan fresca como en 2013, y la parte central es de lo más ambicioso que ha hecho el dúo.",
+    media: [],
+    rankableItem: mockRankableItems[1],
+    review: { authorScore: 9.5 },
+    votesCount: 73,
+    votedByCurrentUser: false,
+    averageRating: 8.4,
+    ratingsCount: 52,
+    currentUserRating: undefined,
+    commentsCount: 12,
+    sharesCount: 5,
+    moderationStatus: "approved",
+    createdAt: "2026-09-24T14:00:00Z",
+    isReelEligible: false,
+  },
+    {
+    id: "p7",
+    kind: "item",
+    category: "music",
+    author: mockUsers[1],
+    caption: "Tema 1 de Random Access Memories.",
+    media: [
+      {
+        id: "m7",
+        url: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+        type: "image",
+      },
+    ],
+    rankableItem: mockRankableItems[4],
+    votesCount: 30,
+    votedByCurrentUser: false,
+    averageRating: 8.6,
+    ratingsCount: 96,
+    currentUserRating: undefined,
+    commentsCount: 3,
+    sharesCount: 1,
+    moderationStatus: "approved",
+    createdAt: "2026-09-18T15:31:00Z",
+    isReelEligible: false,
+  },
+  {
+    id: "p8",
+    kind: "item",
+    category: "music",
+    author: mockUsers[1],
+    caption: "Tema 5 de Random Access Memories.",
+    media: [
+      {
+        id: "m8",
+        url: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+        type: "image",
+      },
+    ],
+    rankableItem: mockRankableItems[5],
+    votesCount: 44,
+    votedByCurrentUser: false,
+    averageRating: 9.0,
+    ratingsCount: 88,
+    currentUserRating: undefined,
+    commentsCount: 5,
+    sharesCount: 2,
+    moderationStatus: "approved",
+    createdAt: "2026-09-18T15:32:00Z",
+    isReelEligible: false,
+  },
+  {
+    id: "p9",
+    kind: "item",
+    category: "music",
+    author: mockUsers[1],
+    caption: "Tema 8 de Random Access Memories.",
+    media: [
+      {
+        id: "m9",
+        url: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+        type: "image",
+      },
+    ],
+    rankableItem: mockRankableItems[6],
+    votesCount: 210,
+    votedByCurrentUser: false,
+    averageRating: 9.7,
+    ratingsCount: 310,
+    currentUserRating: undefined,
+    commentsCount: 27,
+    sharesCount: 18,
+    moderationStatus: "approved",
+    createdAt: "2026-09-18T15:33:00Z",
     isReelEligible: false,
   },
 ];

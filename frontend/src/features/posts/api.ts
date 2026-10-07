@@ -8,13 +8,33 @@ const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
 // (simula la persistencia que tendría una base de datos real).
 let mockPostsState: Post[] = [...initialMockPosts];
 
+// MOCK: los ítems hijos (canciones, capítulos) no se publican por separado en el feed,
+// solo su colección. El backend decidirá qué posts entran al feed.
+function isFeedVisible(post: Post): boolean {
+  return !(post.kind === "item" && post.rankableItem.parentId);
+}
+
 export async function getPosts(): Promise<Post[]> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 300));
-    return mockPostsState;
+    return mockPostsState.filter(isFeedVisible);
   }
 
   const { data } = await api.get<Post[]>("/posts");
+  return data;
+}
+
+export async function getFeaturedPosts(): Promise<Post[]> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 300));
+    // MOCK: destacado = ítems nuevos (nunca reseñas ni hijos), ordenados por puntuación.
+    return mockPostsState
+      .filter((p) => p.kind === "item" && isFeedVisible(p))
+      .sort((a, b) => b.averageRating - a.averageRating);
+  }
+
+  // BACKEND: solo posts de tipo "item", en el orden que decida el algoritmo de destacados.
+  const { data } = await api.get<Post[]>("/posts/featured");
   return data;
 }
 
@@ -98,18 +118,6 @@ export async function unratePost(postId: string): Promise<Post> {
   return data;
 }
 
-export async function getFeaturedPosts(): Promise<Post[]> {
-  if (USE_MOCKS) {
-    await new Promise((r) => setTimeout(r, 300));
-    // MOCK: "destacado" = mejor puntuados. El backend real decidirá esto
-    // con su propio criterio/algoritmo sin que el frontend cambie.
-    return [...mockPostsState].sort((a, b) => b.averageRating - a.averageRating);
-  }
-
-  const { data } = await api.get<Post[]>("/posts/featured");
-  return data;
-}
-
 export async function sharePost(postId: string, recipientId: string): Promise<Post> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 150));
@@ -127,5 +135,30 @@ export async function sharePost(postId: string, recipientId: string): Promise<Po
 
   // BACKEND: envía el post al destinatario (p. ej. como mensaje de chat) y devuelve el post con sharesCount actualizado
   const { data } = await api.post<Post>(`/posts/${postId}/share`, { recipientId });
+  return data;
+}
+
+export async function getPostById(postId: string): Promise<Post> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 200));
+    const post = mockPostsState.find((p) => p.id === postId);
+    if (!post) throw new Error("Post no encontrado");
+    return post;
+  }
+
+  const { data } = await api.get<Post>(`/posts/${postId}`);
+  return data;
+}
+
+export async function getReviewsForItem(itemId: string): Promise<Post[]> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 200));
+    return mockPostsState
+      .filter((p) => p.kind === "review" && p.rankableItem.id === itemId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // BACKEND: reseñas de un ítem, ordenadas con el criterio del servidor (recientes, mejor valoradas...)
+  const { data } = await api.get<Post[]>(`/items/${itemId}/reviews`);
   return data;
 }
