@@ -20,6 +20,7 @@ import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
 import { CATEGORIES } from "../../constants/categories";
 import { CHILDREN_LABELS } from "../../constants/childrenLabels";
+import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 
 type ItemTab = "reviews" | "children" | "links" | "details";
 
@@ -44,12 +45,16 @@ export default function ItemPage() {
   const ratePost = useRatePost();
   const unratePost = useUnratePost();
 
+  const requireAuth = useRequireAuth();
+
   const handlers = {
-    onToggleVote: (postId: string) => toggleVote.mutate(postId),
-    onRate: (postId: string, score: number) => ratePost.mutate({ postId, score }),
-    onUnrate: (postId: string) => unratePost.mutate(postId),
-    onOpenComments: (postId: string) => setCommentsPostId(postId),
-    onOpenShare: (postId: string) => setSharePostId(postId),
+    onToggleVote: requireAuth((postId: string) => toggleVote.mutate(postId)),
+    onRate: requireAuth((postId: string, score: number) =>
+      ratePost.mutate({ postId, score })
+    ),
+    onUnrate: requireAuth((postId: string) => unratePost.mutate(postId)),
+    onOpenComments: (postId: string) => setCommentsPostId(postId), // leer comentarios es libre
+    onOpenShare: requireAuth((postId: string) => setSharePostId(postId)),
   };
 
   function goBack() {

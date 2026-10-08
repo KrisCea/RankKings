@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import PostActions from "./PostActions";
+import PostMediaFrame from "./PostMediaFrame";
 import VerificationBadge from "./VerificationBadge";
 import RankableItemSummary from "./RankableItemSummary";
 import Avatar from "../../../components/ui/Avatar";
@@ -11,6 +12,7 @@ import type { Post } from "../../../types/post";
 interface PostCardProps {
   post: Post;
   variant?: "preview" | "full";
+  focused?: boolean; // en el feed: solo el post en foco muestra la imagen expandida
   showItem?: boolean; // en reseñas: muestra la franja del ítem reseñado
   onToggleVote: (postId: string) => void;
   onRate: (postId: string, score: number) => void;
@@ -41,6 +43,7 @@ function PostLink({
 export default function PostCard({
   post,
   variant = "preview",
+  focused = true,
   showItem = true,
   onToggleVote,
   onRate,
@@ -52,12 +55,16 @@ export default function PostCard({
   const isReview = post.kind === "review";
   const captionClamp = isPreview ? (isReview ? "line-clamp-4" : "line-clamp-3") : "";
 
+  // La imagen se colapsa solo en la vista previa del feed y cuando el post no tiene foco
+  const expanded = !isPreview || focused;
+
   // Una publicación de ítem lleva a la página del ítem; una reseña, a su propia página.
   const destination = isReview ? `/post/${post.id}` : `/item/${post.rankableItem.id}`;
 
   return (
     <article
       data-theme={post.category}
+      data-focus-id={post.id}
       className="bg-surface border border-foreground/10 rounded-xl overflow-hidden mb-4"
     >
       {/* Header: autor (con su propia vista previa de perfil, fuera del link del post) */}
@@ -106,25 +113,27 @@ export default function PostCard({
               </div>
             )}
 
-            <p className={`text-sm text-foreground/80 ${captionClamp}`}>{post.caption}</p>
+            <p className={`text-sm text-foreground/80 lg:text-base ${captionClamp}`}>
+              {post.caption}
+            </p>
           </PostLink>
         </div>
       ) : (
         <PostLink to={destination} enabled={isPreview} className="block">
           {post.media[0] && (
-            <div className="w-full aspect-square bg-background">
-              <img
-                src={post.media[0].url}
-                alt={post.rankableItem.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <PostMediaFrame
+              media={post.media[0]}
+              alt={post.rankableItem.title}
+              expanded={expanded}
+            />
           )}
 
           <div className="px-4 pt-4">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
-                <h3 className="font-semibold text-foreground">{post.rankableItem.title}</h3>
+                <h3 className="font-semibold text-foreground lg:text-lg">
+                  {post.rankableItem.title}
+                </h3>
                 <p className="text-xs text-foreground/50">
                   {post.rankableItem.creator.name}
                   {post.rankableItem.year && ` · ${post.rankableItem.year}`}
@@ -133,7 +142,9 @@ export default function PostCard({
               <VerificationBadge status={post.rankableItem.verificationStatus} />
             </div>
 
-            <p className={`text-sm text-foreground/80 ${captionClamp}`}>{post.caption}</p>
+            <p className={`text-sm text-foreground/80 lg:text-base ${captionClamp}`}>
+              {post.caption}
+            </p>
           </div>
         </PostLink>
       )}

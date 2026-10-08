@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 import { useComments } from "../hooks/useComments";
 import { useAddComment } from "../hooks/useAddComment";
 import { useToggleCommentLike } from "../hooks/useToggleCommentLike";
+import { useCurrentUser } from "../../users/hooks/useCurrentUser";
+import { useRequireAuth } from "../../auth/hooks/useRequireAuth";
 import CommentList from "./CommentList";
 import CommentInput from "./CommentInput";
 import type { Comment } from "../../../types/comment";
@@ -13,12 +16,16 @@ interface CommentsPanelProps {
 }
 
 interface ReplyTarget {
-  parentId: string;  // comentario principal del hilo
-  username: string;  // a quién se responde
+  parentId: string; // comentario principal del hilo
+  username: string; // a quién se responde
 }
 
 export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
+  const location = useLocation();
+
+  const { data: user, isLoading: userLoading } = useCurrentUser();
+  const requireAuth = useRequireAuth();
 
   const { data: comments, isLoading } = useComments(postId);
   const addComment = useAddComment(postId ?? "");
@@ -38,12 +45,12 @@ export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
     setReplyTarget(null);
   }, [postId]);
 
-  function handleReply(comment: Comment) {
+  const handleReply = requireAuth((comment: Comment) => {
     setReplyTarget({
       parentId: comment.parentId ?? comment.id,
       username: comment.author.username,
     });
-  }
+  });
 
   function handleSubmit(text: string) {
     addComment.mutate(
@@ -60,11 +67,7 @@ export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
 
       <div className="relative w-full md:max-w-xl h-[85vh] md:h-180 max-h-[90vh] bg-background rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-foreground/10 p-4">
@@ -82,18 +85,36 @@ export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
           <CommentList
             comments={comments ?? []}
             isLoading={isLoading}
-            onToggleLike={(id) => toggleLike.mutate(id)}
+            onToggleLike={requireAuth((id: string) => toggleLike.mutate(id))}
             onReply={handleReply}
           />
         </div>
 
         <div className="px-4 pb-4">
-          <CommentInput
-            onSubmit={handleSubmit}
-            isSubmitting={addComment.isPending}
-            replyingTo={replyTarget?.username}
-            onCancelReply={() => setReplyTarget(null)}
-          />
+          {user ? (
+            <CommentInput
+              onSubmit={handleSubmit}
+              isSubmitting={addComment.isPending}
+              replyingTo={replyTarget?.username}
+              onCancelReply={() => setReplyTarget(null)}
+            />
+          ) : (
+            !userLoading && (
+              <p className="mt-2 border-t border-foreground/10 pt-3 text-center text-sm text-foreground/60">
+                <Link
+                  to="/login"
+                  state={{
+                    from: location.pathname + location.search,
+                    reason: "auth-required",
+                  }}
+                  className="text-primary hover:underline"
+                >
+                  Inicia sesión
+                </Link>{" "}
+                para comentar.
+              </p>
+            )
+          )}
         </div>
       </div>
     </div>

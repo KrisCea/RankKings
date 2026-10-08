@@ -3,6 +3,8 @@ import { usePosts } from "../../features/posts/hooks/usePosts";
 import { useToggleVote } from "../../features/posts/hooks/useToggleVote";
 import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
+import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
+import { useCenterFocus } from "../../hooks/useCenterFocus";
 import PostCard from "../../features/posts/components/PostCard";
 import ViewTabs from "../../features/posts/components/ViewTabs";
 import FeaturedCarousel from "../../features/posts/components/FeaturedCarousel";
@@ -22,31 +24,49 @@ export default function Home() {
   const toggleVote = useToggleVote();
   const ratePost = useRatePost();
   const unratePost = useUnratePost();
+  const requireAuth = useRequireAuth();
+
+  // El post que cruza el centro de la pantalla se expande; el resto queda en formato cine
+  const { containerRef, focusedId } = useCenterFocus(
+    (posts ?? []).map((p) => p.id),
+    viewMode === "posts"
+  );
 
   // Se busca en la lista cacheada para que el modal refleje votos y puntuaciones en vivo
   const galleryPost = posts?.find((p) => p.id === galleryPostId);
 
   const postHandlers = {
-    onToggleVote: (id: string) => toggleVote.mutate(id),
-    onRate: (id: string, score: number) => ratePost.mutate({ postId: id, score }),
-    onUnrate: (id: string) => unratePost.mutate(id),
-    onOpenComments: (id: string) => setActiveCommentsPostId(id),
-    onOpenShare: (id: string) => setActiveSharePostId(id),
+    onToggleVote: requireAuth((id: string) => toggleVote.mutate(id)),
+    onRate: requireAuth((id: string, score: number) => ratePost.mutate({ postId: id, score })),
+    onUnrate: requireAuth((id: string) => unratePost.mutate(id)),
+    onOpenComments: (id: string) => setActiveCommentsPostId(id), // leer comentarios es libre
+    onOpenShare: requireAuth((id: string) => setActiveSharePostId(id)),
   };
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="w-full">
       <FeaturedCarousel />
 
       <ViewTabs active={viewMode} onChange={setViewMode} />
 
       {viewMode === "posts" && (
-        <>
+        <div
+          ref={containerRef}
+          // La compensación de scroll la hace useCenterFocus; el anclaje nativo del navegador
+          // se desactiva para que no compense dos veces
+          style={{ overflowAnchor: "none" }}
+          className="mx-auto w-full max-w-2xl lg:max-w-3xl 2xl:max-w-4xl"
+        >
           {isLoading && <p className="text-foreground/60">Cargando...</p>}
           {posts?.map((post) => (
-            <PostCard key={post.id} post={post} {...postHandlers} />
+            <PostCard
+              key={post.id}
+              post={post}
+              focused={post.id === focusedId}
+              {...postHandlers}
+            />
           ))}
-        </>
+        </div>
       )}
 
       {viewMode === "reels" && (

@@ -1,6 +1,6 @@
 import { api } from "../../lib/axios";
 import { mockComments as initialMockComments } from "../../mocks/comments";
-import { getMockSessionUser } from "../../mocks/accounts";
+import { getMockSessionUser, requireMockSession } from "../../mocks/accounts";
 import type { Comment, NewCommentInput } from "../../types/comment";
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
@@ -11,9 +11,12 @@ let mockCommentsState: Comment[] = [...initialMockComments];
 export async function getComments(postId: string): Promise<Comment[]> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 250));
+    const hasSession = getMockSessionUser() !== null;
+
     return mockCommentsState
       .filter((c) => c.postId === postId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .map((c) => (hasSession ? c : { ...c, likedByCurrentUser: false }));
   }
 
   // BACKEND: lista plana con parentId; el frontend agrupa los hilos
@@ -52,6 +55,8 @@ export async function addComment(postId: string, input: NewCommentInput): Promis
 export async function toggleCommentLike(commentId: string): Promise<Comment> {
   if (USE_MOCKS) {
     await new Promise((r) => setTimeout(r, 150));
+    requireMockSession();
+
     const index = mockCommentsState.findIndex((c) => c.id === commentId);
     if (index === -1) throw new Error("Comentario no encontrado");
 
@@ -66,6 +71,7 @@ export async function toggleCommentLike(commentId: string): Promise<Comment> {
     return updated;
   }
 
+  // BACKEND: alterna el like del usuario de la sesión. Sin sesión: 401.
   const { data } = await api.post<Comment>(`/comments/${commentId}/like`);
   return data;
 }

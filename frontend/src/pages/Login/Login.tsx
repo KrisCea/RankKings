@@ -16,7 +16,9 @@ type LoginForm = z.infer<typeof schema>;
 
 export default function Login() {
   const location = useLocation();
-  const from = (location.state as { from?: string } | null)?.from ?? "/";
+  const routeState = location.state as { from?: string; reason?: string } | null;
+  const from = routeState?.from ?? "/";
+  const authRequired = routeState?.reason === "auth-required";
 
   const { data: currentUser, isLoading } = useCurrentUser();
   const login = useLogin();
@@ -36,6 +38,11 @@ export default function Login() {
       <p className="mb-6 text-sm text-foreground/60">
         Entra para votar, comentar y guardar tus ítems.
       </p>
+      {authRequired && (
+        <p role="status" className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
+          Inicia sesión o crea una cuenta para interactuar.
+        </p>
+      )}
 
       <form
         onSubmit={handleSubmit((values) => login.mutate(values))}

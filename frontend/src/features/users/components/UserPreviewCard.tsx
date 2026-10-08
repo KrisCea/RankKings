@@ -3,6 +3,7 @@ import Avatar from "../../../components/ui/Avatar";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useToggleFollow } from "../hooks/useToggleFollow";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useRequireAuth } from "../../auth/hooks/useRequireAuth";
 
 interface UserPreviewCardProps {
   username: string;
@@ -12,6 +13,7 @@ export default function UserPreviewCard({ username }: UserPreviewCardProps) {
   const { data: profile, isLoading } = useUserProfile(username);
   const { data: currentUser } = useCurrentUser();
   const toggleFollow = useToggleFollow();
+  const requireAuth = useRequireAuth();
 
   if (isLoading || !profile) {
     return (
@@ -62,7 +64,7 @@ export default function UserPreviewCard({ username }: UserPreviewCardProps) {
         </Link>
       ) : (
         <button
-          onClick={() => toggleFollow.mutate(profile.username)}
+          onClick={requireAuth(() => toggleFollow.mutate(profile.username))}
           disabled={toggleFollow.isPending}
           className={`w-full rounded-full py-1.5 text-xs font-medium transition-colors disabled:opacity-60 ${
             profile.isFollowedByCurrentUser

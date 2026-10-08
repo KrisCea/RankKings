@@ -10,7 +10,7 @@ interface GalleryViewProps {
 export default function GalleryView({ posts, isLoading, onSelectPost }: GalleryViewProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-1">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="aspect-square animate-pulse bg-surface" />
         ))}
@@ -25,7 +25,7 @@ export default function GalleryView({ posts, isLoading, onSelectPost }: GalleryV
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div className="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-1">
       {posts.map((post) => (
         <GalleryItem key={post.id} post={post} onSelect={onSelectPost} />
       ))}

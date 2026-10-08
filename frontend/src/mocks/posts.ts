@@ -14,6 +14,8 @@ export const mockPosts: Post[] = [
         id: "m1",
         url: "https://image.tmdb.org/t/p/w780/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
         type: "image",
+        width: 780,
+        height: 1170,
       },
     ],
     rankableItem: mockRankableItems[0],
@@ -36,9 +38,11 @@ export const mockPosts: Post[] = [
     caption: "El disco que redefinió la música electrónica moderna.",
     media: [
       {
-        id: "m2",
-        url: "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg",
+        id: "m1",
+        url: "https://i.scdn.co/image/ab67616d0000b2731e81bff9807a9e629fce5ade",
         type: "image",
+        width: 780,
+        height: 1170,
       },
     ],
     rankableItem: mockRankableItems[1],
@@ -61,9 +65,11 @@ export const mockPosts: Post[] = [
     caption: "Realismo mágico en su máxima expresión.",
     media: [
       {
-        id: "m3",
-        url: "https://upload.wikimedia.org/wikipedia/commons/4/4f/Gabriel_Garcia_Marquez_Cien_anos_de_soledad.jpg",
+        id: "m1",
+        url: "https://m.media-amazon.com/images/I/81dBNY1qgUL._UF1000,1000_QL80_.jpg",
         type: "image",
+        width: 780,
+        height: 1170,
       },
     ],
     rankableItem: mockRankableItems[2],
@@ -86,9 +92,11 @@ export const mockPosts: Post[] = [
     caption: "Un ícono del post-impresionismo.",
     media: [
       {
-        id: "m4",
-        url: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+        id: "m1",
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/La_noche_estrellada1.jpg/250px-La_noche_estrellada1.jpg?utm_source=es.wikipedia.org&utm_campaign=parser&utm_content=thumbnail",
         type: "image",
+        width: 250,
+        height: 375,
       },
     ],
     rankableItem: mockRankableItems[3],

@@ -8,6 +8,7 @@ import { usePost } from "../../features/posts/hooks/usePost";
 import { useToggleVote } from "../../features/posts/hooks/useToggleVote";
 import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
+import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 
 export default function PostPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ export default function PostPage() {
   const toggleVote = useToggleVote();
   const ratePost = useRatePost();
   const unratePost = useUnratePost();
+  const requireAuth = useRequireAuth();
 
   // Las publicaciones de ítem viven en la página del ítem; aquí solo hay reseñas
   if (post?.kind === "item") {
@@ -56,11 +58,13 @@ export default function PostPage() {
           <PostCard
             post={post}
             variant="full"
-            onToggleVote={(postId) => toggleVote.mutate(postId)}
-            onRate={(postId, score) => ratePost.mutate({ postId, score })}
-            onUnrate={(postId) => unratePost.mutate(postId)}
+            onToggleVote={requireAuth((postId: string) => toggleVote.mutate(postId))}
+            onRate={requireAuth((postId: string, score: number) =>
+              ratePost.mutate({ postId, score })
+            )}
+            onUnrate={requireAuth((postId: string) => unratePost.mutate(postId))}
             onOpenComments={() => setCommentsOpen(true)}
-            onOpenShare={() => setShareOpen(true)}
+            onOpenShare={requireAuth(() => setShareOpen(true))}
           />
         </div>
       )}

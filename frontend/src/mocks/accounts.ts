@@ -61,6 +61,12 @@ export function getMockSessionUser(): User | null {
   return userId ? findMockUserById(userId) : null;
 }
 
+export function requireMockSession(): User {
+  const user = getMockSessionUser();
+  if (!user) throw new Error("Debes iniciar sesión");
+  return user;
+}
+
 export function findMockAccountByEmail(email: string): MockAccount | undefined {
   const normalized = email.trim().toLowerCase();
   return accounts.find((a) => a.email === normalized);

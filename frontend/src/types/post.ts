@@ -9,6 +9,10 @@ export interface PostMedia {
   url: string;
   type: MediaType;
   thumbnailUrl?: string;
+  // BACKEND: dimensiones originales, las calcula el servidor al subir el archivo.
+  // Permiten reservar el tamaño correcto antes de que cargue la imagen (sin saltos de layout).
+  width?: number;
+  height?: number;
 }
 
 export type ModerationStatus = "approved" | "pending" | "rejected";

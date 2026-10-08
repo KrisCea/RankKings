@@ -24,7 +24,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-foreground/10">
-      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
+      <nav className="mx-auto flex max-w-6xl 2xl:max-w-7xl items-center gap-4 px-6 py-4">
         <Link to="/" className="shrink-0 text-lg font-semibold tracking-tight text-accent">
           RankKings
         </Link>
