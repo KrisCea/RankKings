@@ -2,7 +2,7 @@ import { api } from "../../lib/axios";
 import { mockPosts as initialMockPosts } from "../../mocks/posts";
 import { getMockSessionUser, requireMockSession } from "../../mocks/accounts";
 import { withSavedState } from "../../mocks/savedItems";
-import type { Post } from "../../types/post";
+import type { Post, PostKind } from "../../types/post";
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
 
@@ -186,5 +186,20 @@ export async function sharePost(postId: string, recipientId: string): Promise<Po
   // BACKEND: envía el post al destinatario (p. ej. como mensaje de chat) y devuelve el post
   // con sharesCount actualizado. Sin sesión: 401.
   const { data } = await api.post<Post>(`/posts/${postId}/share`, { recipientId });
+  return data;
+}
+
+export async function getPostsByAuthor(username: string, kind: PostKind): Promise<Post[]> {
+  if (USE_MOCKS) {
+    await new Promise((r) => setTimeout(r, 250));
+    return mockPostsState
+      .filter((p) => p.author.username === username && p.kind === kind && isFeedVisible(p))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map(forViewer);
+  }
+
+  // BACKEND: GET /users/:username/posts?kind=item|review, más recientes primero.
+  // Con paginación por cursor cuando haya volumen.
+  const { data } = await api.get<Post[]>(`/users/${username}/posts`, { params: { kind } });
   return data;
 }

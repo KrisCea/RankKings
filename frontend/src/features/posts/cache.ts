@@ -6,7 +6,9 @@ export function syncPostInCache(queryClient: QueryClient, updated: Post) {
   const replace = (list?: Post[]) => list?.map((p) => (p.id === updated.id ? updated : p));
 
   queryClient.setQueryData<Post[]>(["posts"], replace);
+  queryClient.setQueryData<Post[]>(["featuredPosts"], replace);
   queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, replace);
+  queryClient.setQueriesData<Post[]>({ queryKey: ["userPosts"] }, replace);
   queryClient.setQueryData<Post>(["post", updated.id], updated);
 
   // La puntuación de un post de ítem es la del propio ítem: mantiene su ficha sincronizada

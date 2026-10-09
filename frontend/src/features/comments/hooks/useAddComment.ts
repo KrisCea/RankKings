@@ -16,16 +16,14 @@ export function useAddComment(postId: string) {
 
       // Las respuestas también cuentan en el total de comentarios del post
       const addOne = (post: Post): Post => ({ ...post, commentsCount: post.commentsCount + 1 });
+      const patch = (list?: Post[]) =>
+        list?.map((post) => (post.id === postId ? addOne(post) : post));
 
-      queryClient.setQueryData<Post[]>(["posts"], (old) =>
-        old?.map((post) => (post.id === postId ? addOne(post) : post))
-      );
-      
+      queryClient.setQueryData<Post[]>(["posts"], patch);
+      queryClient.setQueryData<Post[]>(["featuredPosts"], patch);
+      queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, patch);
+      queryClient.setQueriesData<Post[]>({ queryKey: ["userPosts"] }, patch);
       queryClient.setQueryData<Post>(["post", postId], (old) => (old ? addOne(old) : old));
-    
-      queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, (old) =>
-        old?.map((post) => (post.id === postId ? addOne(post) : post))
-      );
     },
   });
 }

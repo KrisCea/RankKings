@@ -2,7 +2,7 @@ import type { User, UserSummary } from "../types/user";
 
 export const mockCurrentUser: User = {
   id: "1",
-  username: "cris",
+  username: "crisc",
   displayName: "Cristóbal",
   avatarUrl: "https://ui-avatars.com/api/?name=Cristobal&background=6366f1&color=fff",
   accountType: "individual",

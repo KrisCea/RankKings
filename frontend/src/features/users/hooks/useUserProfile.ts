@@ -6,5 +6,6 @@ export function useUserProfile(username: string | null) {
     queryKey: ["userProfile", username],
     queryFn: () => getUserProfile(username as string),
     enabled: username !== null,
+    retry: false,
   });
 }

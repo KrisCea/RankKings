@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import Avatar from "../../../components/ui/Avatar";
+import FollowButton from "./FollowButton";
 import { useUserProfile } from "../hooks/useUserProfile";
-import { useToggleFollow } from "../hooks/useToggleFollow";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { useRequireAuth } from "../../auth/hooks/useRequireAuth";
 
 interface UserPreviewCardProps {
   username: string;
@@ -12,8 +11,6 @@ interface UserPreviewCardProps {
 export default function UserPreviewCard({ username }: UserPreviewCardProps) {
   const { data: profile, isLoading } = useUserProfile(username);
   const { data: currentUser } = useCurrentUser();
-  const toggleFollow = useToggleFollow();
-  const requireAuth = useRequireAuth();
 
   if (isLoading || !profile) {
     return (
@@ -58,22 +55,12 @@ export default function UserPreviewCard({ username }: UserPreviewCardProps) {
       {isOwnProfile ? (
         <Link
           to={`/profile/${profile.username}`}
-          className="block w-full rounded-full border border-foreground/10 bg-surface py-1.5 text-center text-xs font-medium text-foreground"
+          className="block w-full rounded-full border border-foreground/10 bg-surface py-1.5 text-center text-sm font-medium text-foreground"
         >
           Ver mi perfil
         </Link>
       ) : (
-        <button
-          onClick={requireAuth(() => toggleFollow.mutate(profile.username))}
-          disabled={toggleFollow.isPending}
-          className={`w-full rounded-full py-1.5 text-xs font-medium transition-colors disabled:opacity-60 ${
-            profile.isFollowedByCurrentUser
-              ? "bg-surface text-foreground border border-foreground/10 hover:text-red-500"
-              : "bg-primary text-white"
-          }`}
-        >
-          {profile.isFollowedByCurrentUser ? "Siguiendo" : "Seguir"}
-        </button>
+        <FollowButton profile={profile} className="w-full" />
       )}
     </div>
   );
