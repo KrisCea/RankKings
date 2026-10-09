@@ -8,9 +8,7 @@ import PostPage from "../pages/PostPage/PostPage";
 import RootLayout from "../components/layout/RootLayout";
 import ItemPage from "../pages/ItemPage/ItemPage";
 import LibraryPage from "../pages/LibraryPage/LibraryPage";
-
-
-
+import VerifyEmailPage from "../pages/VerifyEmailPage/VerifyEmailPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "post/:id", element: <PostPage /> },
       { path: "item/:id", element: <ItemPage /> },
       { path: "library", element: <LibraryPage /> },
+      { path: "verify-email", element: <VerifyEmailPage /> },
     ],
   },
 ]);

@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import TextField from "../../components/ui/TextField";
+import PasswordField from "../../components/ui/PasswordField";
+import CaptchaField from "../../features/auth/components/CaptchaField";
+import PasswordStrengthMeter from "../../features/auth/components/PasswordStrengthMeter";
+import { containsPersonalInfo, passwordSchema } from "../../features/auth/password";
 import { useRegister } from "../../features/auth/hooks/useRegister";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { getErrorMessage } from "../../lib/errors";
@@ -14,19 +19,28 @@ const schema = z
       .string()
       .regex(/^[a-zA-Z0-9_]{3,20}$/, "De 3 a 20 caracteres: letras, números y guion bajo"),
     email: z.string().email("Ingresa un correo válido"),
-    password: z.string().min(8, "Mínimo 8 caracteres"),
+    password: passwordSchema,
     confirmPassword: z.string(),
+    captchaToken: z.string().min(1, "Confirma que no eres un robot"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],
+  })
+  .refine((data) => !containsPersonalInfo(data.password, [data.username, data.email.split("@")[0]]), {
+    message: "No uses tu usuario ni tu correo dentro de la contraseña",
+    path: ["password"],
   });
 
 type RegisterForm = z.infer<typeof schema>;
 
 export default function Register() {
   const location = useLocation();
+  const navigate = useNavigate();
   const from = (location.state as { from?: string } | null)?.from ?? "/";
+
+  // El token del captcha es de un solo uso: al fallar el registro se vuelve a montar el widget
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const { data: currentUser, isLoading } = useCurrentUser();
   const registerUser = useRegister();
@@ -34,18 +48,40 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm<RegisterForm>({ resolver: zodResolver(schema) });
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(schema),
+    defaultValues: { captchaToken: "" },
+  });
+
+  const password = watch("password") ?? "";
+  const personal = [watch("username") ?? "", (watch("email") ?? "").split("@")[0]];
 
   if (!isLoading && currentUser) return <Navigate to={from} replace />;
 
   function onSubmit(values: RegisterForm) {
-    registerUser.mutate({
-      displayName: values.displayName,
-      username: values.username,
-      email: values.email,
-      password: values.password,
-    });
+    registerUser.mutate(
+      {
+        displayName: values.displayName,
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        captchaToken: values.captchaToken,
+      },
+      {
+        onSuccess: (result) =>
+          navigate("/verify-email", {
+            replace: true,
+            state: { email: result.email, devVerificationUrl: result.devVerificationUrl, from },
+          }),
+        onError: () => {
+          setValue("captchaToken", "");
+          setCaptchaKey((key) => key + 1);
+        },
+      }
+    );
   }
 
   return (
@@ -76,19 +112,28 @@ export default function Register() {
           error={errors.email?.message}
           {...register("email")}
         />
-        <TextField
-          label="Contraseña"
-          type="password"
-          autoComplete="new-password"
-          error={errors.password?.message}
-          {...register("password")}
-        />
-        <TextField
+
+        <div className="flex flex-col gap-2">
+          <PasswordField
+            label="Contraseña"
+            autoComplete="new-password"
+            error={errors.password?.message}
+            {...register("password")}
+          />
+          <PasswordStrengthMeter password={password} personal={personal} />
+        </div>
+
+        <PasswordField
           label="Repite la contraseña"
-          type="password"
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
           {...register("confirmPassword")}
+        />
+
+        <CaptchaField
+          key={captchaKey}
+          onChange={(token) => setValue("captchaToken", token ?? "", { shouldValidate: true })}
+          error={errors.captchaToken?.message}
         />
 
         {registerUser.isError && (
