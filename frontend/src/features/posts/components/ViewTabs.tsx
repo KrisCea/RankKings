@@ -14,7 +14,7 @@ const TABS: { mode: FeedViewMode; label: string; icon: typeof List }[] = [
 
 export default function ViewTabs({ active, onChange }: ViewTabsProps) {
   return (
-    <div className="sticky top-[73px] z-40 bg-background border-b border-foreground/10 mb-4">
+    <div className="sticky top-17 z-40 bg-background border-b border-foreground/10 mb-4">
       <div role="tablist" className="flex items-center justify-center gap-1">
         {TABS.map(({ mode, label, icon: Icon }) => {
           const isActive = active === mode;

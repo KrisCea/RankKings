@@ -7,6 +7,10 @@ import MovieDetail from "../pages/MovieDetail/MovieDetail";
 import PostPage from "../pages/PostPage/PostPage";
 import RootLayout from "../components/layout/RootLayout";
 import ItemPage from "../pages/ItemPage/ItemPage";
+import LibraryPage from "../pages/LibraryPage/LibraryPage";
+
+
+
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "movie/:id", element: <MovieDetail /> },
       { path: "post/:id", element: <PostPage /> },
       { path: "item/:id", element: <ItemPage /> },
+      { path: "library", element: <LibraryPage /> },
     ],
   },
 ]);

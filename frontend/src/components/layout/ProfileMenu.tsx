@@ -5,6 +5,7 @@ import Avatar from "../ui/Avatar";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { useLogout } from "../../features/auth/hooks/useLogout";
+import { LIST_NAME } from "../../constants/lists";
 
 export default function ProfileMenu() {
   const [open, setOpen] = useState(false);
@@ -66,6 +67,15 @@ export default function ProfileMenu() {
           >
             Ver perfil
           </Link>
+          
+          <Link
+            to="/library"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-surface"
+          >
+            {LIST_NAME}
+          </Link>
+
           <Link
             to="/settings"
             onClick={() => setOpen(false)}

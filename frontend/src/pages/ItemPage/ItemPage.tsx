@@ -21,6 +21,7 @@ import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
 import { CATEGORIES } from "../../constants/categories";
 import { CHILDREN_LABELS } from "../../constants/childrenLabels";
 import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
+import SaveButton from "../../features/items/components/SaveButton";
 
 type ItemTab = "reviews" | "children" | "links" | "details";
 
@@ -122,6 +123,12 @@ export default function ItemPage() {
           </div>
           <div className="mt-2">
             <VerificationBadge status={item.verificationStatus} />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <SaveButton item={item} />
+            <span className="text-xs text-foreground/50">
+              En {item.savesCount} {item.savesCount === 1 ? "lista" : "listas"}
+            </span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { api } from "../../lib/axios";
 import { mockPosts as initialMockPosts } from "../../mocks/posts";
 import { getMockSessionUser, requireMockSession } from "../../mocks/accounts";
+import { withSavedState } from "../../mocks/savedItems";
 import type { Post } from "../../types/post";
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
@@ -15,11 +16,12 @@ function isFeedVisible(post: Post): boolean {
   return !(post.kind === "item" && post.rankableItem.parentId);
 }
 
-// MOCK: un visitante no tiene votos ni puntuaciones propias.
-// El backend resuelve esto según la sesión de quien consulta.
+// MOCK: agrega lo que depende de quién consulta (el backend lo resuelve con la sesión):
+// el estado de la lista del ítem y, para un visitante, que no tiene votos ni puntuaciones propias.
 function forViewer(post: Post): Post {
-  if (getMockSessionUser()) return post;
-  return { ...post, votedByCurrentUser: false, currentUserRating: undefined };
+  const rankableItem = withSavedState(post.rankableItem);
+  if (getMockSessionUser()) return { ...post, rankableItem };
+  return { ...post, rankableItem, votedByCurrentUser: false, currentUserRating: undefined };
 }
 
 export async function getPosts(): Promise<Post[]> {
@@ -89,7 +91,7 @@ export async function toggleVote(postId: string): Promise<Post> {
     };
 
     mockPostsState[index] = updated;
-    return updated;
+    return forViewer(updated);
   }
 
   // BACKEND: alterna el voto del usuario de la sesión y devuelve el post actualizado.
@@ -122,7 +124,7 @@ export async function ratePost(postId: string, score: number): Promise<Post> {
     };
 
     mockPostsState[index] = updated;
-    return updated;
+    return forViewer(updated);
   }
 
   // BACKEND: guarda o actualiza la puntuación del usuario de la sesión y devuelve el post con el
@@ -140,7 +142,7 @@ export async function unratePost(postId: string): Promise<Post> {
     if (index === -1) throw new Error("Post no encontrado");
 
     const post = mockPostsState[index];
-    if (post.currentUserRating === undefined) return post; // no había puntuado
+    if (post.currentUserRating === undefined) return forViewer(post); // no había puntuado
 
     const newRatingsCount = Math.max(post.ratingsCount - 1, 0);
     const totalBefore = post.averageRating * post.ratingsCount;
@@ -155,7 +157,7 @@ export async function unratePost(postId: string): Promise<Post> {
     };
 
     mockPostsState[index] = updated;
-    return updated;
+    return forViewer(updated);
   }
 
   // BACKEND: elimina la puntuación del usuario de la sesión y devuelve el post actualizado.
@@ -178,7 +180,7 @@ export async function sharePost(postId: string, recipientId: string): Promise<Po
     };
 
     mockPostsState[index] = updated;
-    return updated;
+    return forViewer(updated);
   }
 
   // BACKEND: envía el post al destinatario (p. ej. como mensaje de chat) y devuelve el post

@@ -29,6 +29,10 @@ export interface RankableItem {
   childrenCount: number;
   childrenAverageRating?: number; // calculado por el backend a partir de los hijos
 
+  // Lista personal: lo calcula el backend según la sesión de quien consulta
+  savedByCurrentUser: boolean;
+  savesCount: number; // cuántas personas lo tienen en su lista (señal para estadísticas)
+
   externalLinks: ExternalLink[];
   createdAt: string;
 }

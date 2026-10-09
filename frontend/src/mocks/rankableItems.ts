@@ -3,6 +3,7 @@ import { mockCreators } from "./creators";
 
 const RAM_COVER = "https://upload.wikimedia.org/wikipedia/en/a/a7/Random_Access_Memories.jpg";
 
+// savesCount es la base de "otras personas"; withSavedState le suma las listas de las cuentas mock.
 export const mockRankableItems: RankableItem[] = [
   {
     id: "ri1",
@@ -20,6 +21,8 @@ export const mockRankableItems: RankableItem[] = [
     averageRating: 8.9,
     ratingsCount: 214,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 380,
     externalLinks: [
       { id: "l1", label: "Apple TV", url: "https://tv.apple.com", type: "streaming" },
       { id: "l2", label: "IMDb", url: "https://www.imdb.com/title/tt15398776/", type: "other" },
@@ -42,6 +45,8 @@ export const mockRankableItems: RankableItem[] = [
     ratingsCount: 401,
     childrenCount: 3,
     childrenAverageRating: 9.1, // MOCK: lo calculará el backend
+    savedByCurrentUser: false,
+    savesCount: 612,
     externalLinks: [
       { id: "l3", label: "Spotify", url: "https://open.spotify.com", type: "streaming" },
       { id: "l4", label: "Discogs", url: "https://www.discogs.com", type: "store" },
@@ -65,6 +70,8 @@ export const mockRankableItems: RankableItem[] = [
     averageRating: 9.5,
     ratingsCount: 150,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 205,
     externalLinks: [
       { id: "l5", label: "Open Library", url: "https://openlibrary.org", type: "other" },
       { id: "l6", label: "Amazon", url: "https://www.amazon.com", type: "store" },
@@ -87,8 +94,15 @@ export const mockRankableItems: RankableItem[] = [
     averageRating: 8.7,
     ratingsCount: 98,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 97,
     externalLinks: [
-      { id: "l7", label: "Google Arts & Culture", url: "https://artsandculture.google.com", type: "other" },
+      {
+        id: "l7",
+        label: "Google Arts & Culture",
+        url: "https://artsandculture.google.com",
+        type: "other",
+      },
       { id: "l8", label: "MoMA", url: "https://www.moma.org", type: "other" },
     ],
     createdAt: "2026-09-22T12:00:00Z",
@@ -111,6 +125,8 @@ export const mockRankableItems: RankableItem[] = [
     parentId: "ri2",
     position: 1,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 140,
     externalLinks: [],
     createdAt: "2026-09-18T15:31:00Z",
   },
@@ -130,6 +146,8 @@ export const mockRankableItems: RankableItem[] = [
     parentId: "ri2",
     position: 5,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 205,
     externalLinks: [],
     createdAt: "2026-09-18T15:32:00Z",
   },
@@ -149,6 +167,8 @@ export const mockRankableItems: RankableItem[] = [
     parentId: "ri2",
     position: 8,
     childrenCount: 0,
+    savedByCurrentUser: false,
+    savesCount: 890,
     externalLinks: [
       { id: "l9", label: "Spotify", url: "https://open.spotify.com", type: "streaming" },
     ],

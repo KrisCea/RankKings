@@ -8,6 +8,7 @@ import RankableItemSummary from "./RankableItemSummary";
 import Avatar from "../../../components/ui/Avatar";
 import UserHoverCard from "../../users/components/UserHoverCard";
 import type { Post } from "../../../types/post";
+import SaveButton from "../../items/components/SaveButton";
 
 interface PostCardProps {
   post: Post;
@@ -84,10 +85,12 @@ export default function PostCard({
           </div>
         </UserHoverCard>
 
-        {isReview && (
+        {isReview ? (
           <span className="ml-auto rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
             Reseña
           </span>
+        ) : (
+          <SaveButton item={post.rankableItem} variant="icon" className="ml-auto" />
         )}
       </div>
 

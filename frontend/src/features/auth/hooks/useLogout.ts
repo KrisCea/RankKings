@@ -9,6 +9,7 @@ export function useLogout() {
 
     onSuccess: async () => {
       queryClient.setQueryData(["currentUser"], null);
+      queryClient.removeQueries({ queryKey: ["savedItems"] });
       await queryClient.invalidateQueries({
         predicate: (query) => query.queryKey[0] !== "currentUser",
       });
