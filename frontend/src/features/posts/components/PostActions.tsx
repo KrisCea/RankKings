@@ -34,6 +34,7 @@ export default function PostActions({
 
           <button
             onClick={onOpenComments}
+            aria-label="Comentarios"
             className="flex items-center gap-1.5 text-sm text-foreground/70 hover:text-primary transition-colors"
           >
             <MessageCircle size={20} />
@@ -42,6 +43,7 @@ export default function PostActions({
 
           <button
             onClick={onOpenShare}
+            aria-label="Compartir"
             className="flex items-center gap-1.5 text-sm text-foreground/70 hover:text-primary transition-colors"
           >
             <Share2 size={20} />
