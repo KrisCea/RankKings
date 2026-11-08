@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CATEGORIES } from "../../constants/categories";
+import { CATEGORIES } from "../../categories/registry";
 import { useClickOutside } from "../../hooks/useClickOutside";
 
 export default function CategoriesDropdown() {

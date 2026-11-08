@@ -13,11 +13,4 @@ export interface RegisterInput {
 
 export interface RegisterResult {
   email: string;
-  // MOCK: el backend NUNCA devuelve el enlace de verificación; solo llega por correo.
-  devVerificationUrl?: string;
-}
-
-export interface ResendVerificationResult {
-  // MOCK: igual que arriba
-  devVerificationUrl?: string;
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import TextField from "../../components/ui/TextField";
 import PasswordField from "../../components/ui/PasswordField";
+import AuthPageLayout from "../../features/auth/components/AuthPageLayout";
 import { useLogin } from "../../features/auth/hooks/useLogin";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { AUTH_ERROR, getErrorCode, getErrorMessage } from "../../lib/errors";
@@ -39,14 +40,15 @@ export default function Login() {
   if (!isLoading && currentUser) return <Navigate to={from} replace />;
 
   return (
-    <div className="mx-auto w-full max-w-sm py-8">
-      <h1 className="mb-1 text-2xl font-bold text-foreground">Iniciar sesión</h1>
-      <p className="mb-6 text-sm text-foreground/60">
-        Entra para votar, comentar y guardar tus ítems.
-      </p>
-
+    <AuthPageLayout
+      title="Iniciar sesión"
+      description="Entra para votar, comentar y guardar tus ítems."
+    >
       {authRequired && (
-        <p role="status" className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
+        <p
+          role="status"
+          className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary"
+        >
           Inicia sesión o crea una cuenta para interactuar.
         </p>
       )}
@@ -100,14 +102,6 @@ export default function Login() {
           Regístrate
         </Link>
       </p>
-
-      {import.meta.env.VITE_USE_MOCKS === "true" && (
-        <p className="mt-6 rounded-lg border border-dashed border-foreground/20 p-3 text-xs text-foreground/50">
-          Modo demo: crisc@rankkings.dev, ana@rankkings.dev, sony@rankkings.dev o
-          pedro@rankkings.dev, contraseña 12345678 (la política de 12 caracteres aplica a las
-          cuentas nuevas).
-        </p>
-      )}
-    </div>
+    </AuthPageLayout>
   );
 }

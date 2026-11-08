@@ -1,6 +1,6 @@
-import { CATEGORY_REQUIREMENTS } from "../constants/categoryRequirements";
+import { CATEGORY_REQUIREMENTS } from "../categories/registry";
 import { ENFORCE_REQUIRED_IDENTIFIERS } from "../constants/config";
-import type { CategoryId } from "../constants/categories";
+import type { CategoryId } from "../categories/types";
 import type { VerificationStatus } from "../types/rankableItem";
 
 export function validateIdentifiers(

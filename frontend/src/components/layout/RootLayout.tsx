@@ -5,7 +5,7 @@ export default function RootLayout() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <Navbar />
-      <main className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 2xl:max-w-7xl">
         <Outlet />
       </main>
     </div>

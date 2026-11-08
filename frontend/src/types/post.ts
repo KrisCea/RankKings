@@ -1,4 +1,4 @@
-import type { CategoryId } from "../constants/categories";
+import type { CategoryId } from "../categories/types";
 import type { UserSummary } from "./user";
 import type { RankableItem } from "./rankableItem";
 

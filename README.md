@@ -1,6 +1,11 @@
 # RankKings
 ---
 
+## Documentación del estado actual
+
+Consulta el [resumen del estado actual](docs/ESTADO_PROYECTO_BACKEND.md) y la
+[guía de implementación del backend](docs/GUIA_IMPLEMENTACION_BACKEND.md) para desarrollarlo en un repositorio separado.
+
 # Especificación de Requisitos de Software (ERS)
 
 # Proyecto: RankKings

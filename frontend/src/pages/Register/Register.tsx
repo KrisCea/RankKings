@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import TextField from "../../components/ui/TextField";
 import PasswordField from "../../components/ui/PasswordField";
+import AuthPageLayout from "../../features/auth/components/AuthPageLayout";
 import CaptchaField from "../../features/auth/components/CaptchaField";
 import PasswordStrengthMeter from "../../features/auth/components/PasswordStrengthMeter";
 import { containsPersonalInfo, passwordSchema } from "../../features/auth/password";
@@ -48,7 +49,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<RegisterForm>({
@@ -56,8 +57,10 @@ export default function Register() {
     defaultValues: { captchaToken: "" },
   });
 
-  const password = watch("password") ?? "";
-  const personal = [watch("username") ?? "", (watch("email") ?? "").split("@")[0]];
+  const password = useWatch({ control, name: "password" }) ?? "";
+  const username = useWatch({ control, name: "username" }) ?? "";
+  const email = useWatch({ control, name: "email" }) ?? "";
+  const personal = [username, email.split("@")[0]];
 
   if (!isLoading && currentUser) return <Navigate to={from} replace />;
 
@@ -74,7 +77,7 @@ export default function Register() {
         onSuccess: (result) =>
           navigate("/verify-email", {
             replace: true,
-            state: { email: result.email, devVerificationUrl: result.devVerificationUrl, from },
+            state: { email: result.email, from },
           }),
         onError: () => {
           setValue("captchaToken", "");
@@ -85,12 +88,10 @@ export default function Register() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-sm py-8">
-      <h1 className="mb-1 text-2xl font-bold text-foreground">Crear cuenta</h1>
-      <p className="mb-6 text-sm text-foreground/60">
-        Únete para puntuar, reseñar y guardar lo que quieres ver o escuchar.
-      </p>
-
+    <AuthPageLayout
+      title="Crear cuenta"
+      description="Únete para puntuar, reseñar y guardar lo que quieres ver o escuchar."
+    >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
         <TextField
           label="Nombre"
@@ -157,6 +158,6 @@ export default function Register() {
           Inicia sesión
         </Link>
       </p>
-    </div>
+    </AuthPageLayout>
   );
 }

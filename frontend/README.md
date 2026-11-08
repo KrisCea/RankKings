@@ -26,7 +26,7 @@ frontend/src/
 ├── hooks/ # hooks reutilizables generales
 ├── lib/ # configuración de librerías externas (axios)
 ├── types/ # tipos TypeScript compartidos
-├── constants/ # valores fijos (rutas, enums)
+├── constants/ # valores fijos de configuración
 └── assets/ # imágenes, iconos propios
 
 
@@ -45,9 +45,12 @@ Corre en `http://localhost:5173`
 
 ### Variables de entorno
 
-Copia `.env.example` a `.env` dentro de `frontend/` y completa los valores:
+Copia `.env.example` a `.env` dentro de `frontend/` y completa los valores. El frontend consume
+la API configurada en `VITE_API_URL`; las llamadas están agrupadas por dominio en
+`src/features/*/api.ts` y los componentes acceden a ellas mediante hooks.
 
 VITE_API_URL=http://localhost:8080/api
+VITE_TURNSTILE_SITE_KEY=
 
 
 ### Paleta de colores:
@@ -80,7 +83,4 @@ Esta paleta está diseñada para mantener un equilibrio elegante y un contraste 
 
 
 
-### FUTURO:
-
-Conectar con backend:
-La idea es que los componentes nunca llamen directo a mocks o a axios — siempre pasan por un hook (useX()), y ese hook es el único que sabe de dónde vienen los datos. Así, cuando se conecte el backend, solo se cambia el archivo de la función api.ts respectiva, nada en los componentes cambia.
+La URL debe apuntar a un backend compatible con los endpoints utilizados por cada módulo.

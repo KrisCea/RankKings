@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { CATEGORY_CONFIG } from "../../../constants/categoryConfig";
-import type { CategoryId } from "../../../constants/categories";
+import { CATEGORY_CONFIG } from "../../../categories/registry";
+import type { CategoryId } from "../../../categories/types";
 
 interface VoteButtonProps {
   category: CategoryId;

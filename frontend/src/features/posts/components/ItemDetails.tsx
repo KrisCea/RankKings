@@ -1,4 +1,4 @@
-import { CATEGORY_REQUIREMENTS } from "../../../constants/categoryRequirements";
+import { CATEGORY_REQUIREMENTS } from "../../../categories/registry";
 import VerificationBadge from "./VerificationBadge";
 import type { RankableItem } from "../../../types/rankableItem";
 

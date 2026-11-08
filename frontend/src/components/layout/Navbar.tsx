@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Menu, X } from "lucide-react";
+import { Search, Plus, Menu, X, Sun, Moon } from "lucide-react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import ProfileMenu from "./ProfileMenu";
 import MobileMenu from "./MobileMenu";
-import { Sun, Moon } from "lucide-react";
 import { useTheme } from "../../hooks/useTheme";
 
 export default function Navbar() {
@@ -23,8 +22,8 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-foreground/10">
-      <nav className="mx-auto flex max-w-6xl 2xl:max-w-7xl items-center gap-4 px-6 py-4">
+    <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background">
+      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4 2xl:max-w-7xl sm:px-6">
         <Link to="/" className="shrink-0 text-lg font-semibold tracking-tight text-accent">
           RankKings
         </Link>
@@ -40,7 +39,7 @@ export default function Navbar() {
           </li>
         </ul>
 
-        <div className="hidden flex-1 md:flex md:items-center md:gap-2 max-w-md">
+        <div className="hidden max-w-md flex-1 md:flex md:items-center md:gap-2">
           <div className="relative flex-1">
             <Search
               size={16}
@@ -87,8 +86,6 @@ export default function Navbar() {
           </button>
 
           <ProfileMenu />
-
-          
 
           <button
             aria-label="Abrir menú"

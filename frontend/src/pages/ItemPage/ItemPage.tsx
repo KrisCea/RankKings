@@ -18,8 +18,7 @@ import { usePost } from "../../features/posts/hooks/usePost";
 import { useToggleVote } from "../../features/posts/hooks/useToggleVote";
 import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
-import { CATEGORIES } from "../../constants/categories";
-import { CHILDREN_LABELS } from "../../constants/childrenLabels";
+import { CATEGORIES, CHILDREN_LABELS } from "../../categories/registry";
 import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 import SaveButton from "../../features/items/components/SaveButton";
 

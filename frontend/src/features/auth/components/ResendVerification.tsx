@@ -7,10 +7,9 @@ const COOLDOWN_SECONDS = 60;
 
 interface ResendVerificationProps {
   defaultEmail?: string;
-  onResent?: (devVerificationUrl?: string) => void;
 }
 
-export default function ResendVerification({ defaultEmail, onResent }: ResendVerificationProps) {
+export default function ResendVerification({ defaultEmail }: ResendVerificationProps) {
   const [email, setEmail] = useState(defaultEmail ?? "");
   const [cooldown, setCooldown] = useState(0);
   const [sent, setSent] = useState(false);
@@ -26,10 +25,9 @@ export default function ResendVerification({ defaultEmail, onResent }: ResendVer
 
   function handleResend() {
     resend.mutate(email.trim(), {
-      onSuccess: (result) => {
+      onSuccess: () => {
         setSent(true);
         setCooldown(COOLDOWN_SECONDS);
-        onResent?.(result.devVerificationUrl);
       },
     });
   }

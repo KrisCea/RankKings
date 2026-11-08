@@ -1,5 +1,5 @@
 import { MessageCircle, Play, Star } from "lucide-react";
-import { CATEGORY_CONFIG } from "../../../constants/categoryConfig";
+import { CATEGORY_CONFIG } from "../../../categories/registry";
 import type { Post } from "../../../types/post";
 
 interface GalleryItemProps {

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CATEGORIES } from "../../constants/categories";
+import { CATEGORIES } from "../../categories/registry";
 
 interface MobileMenuProps {
   open: boolean;
