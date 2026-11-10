@@ -45,3 +45,15 @@ export async function getPostsByAuthor(username: string, kind: PostKind): Promis
   const { data } = await api.get<Post[]>(`/users/${username}/posts`, { params: { kind } });
   return data;
 }
+
+export interface NewPostInput {
+  itemId: string;
+  kind: "item" | "review";
+  caption: string;
+  authorScore?: number;
+}
+
+export async function createPost(input: NewPostInput): Promise<Post> {
+  const { data } = await api.post<Post>("/posts", input);
+  return data;
+}

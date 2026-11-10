@@ -32,26 +32,68 @@ frontend/src/
 
 ## 🚀 Cómo correr el proyecto
 
-### Frontend
+### Requisitos
 
-(Estando en /frontend)
+- Node.js compatible con la versión de Vite del proyecto y npm.
+- API Gateway y servicios backend disponibles para probar funciones que requieren datos o sesión.
+
+### Preparar el frontend
+
+Desde la raíz del repositorio, instala las dependencias:
 
 ```bash
+cd frontend
 npm install
+```
+
+Crea el archivo local de variables de entorno a partir del ejemplo (en PowerShell):
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Revisa `VITE_API_URL` en `frontend/.env`; por defecto apunta a `http://localhost:8080/api`. Debe ser la URL pública del API Gateway, no la de un microservicio. Si el gateway usa otra dirección, actualízala antes de iniciar la app.
+
+### Ejecutar el frontend
+
+Desde la carpeta `frontend`:
+
+```bash
 npm run dev
 ```
 
-Corre en `http://localhost:5173`
+Abre la URL que muestra Vite (por defecto `http://localhost:5173`).
 
-### Variables de entorno
+### CAPTCHA en desarrollo
 
-Copia `.env.example` a `.env` dentro de `frontend/` y completa los valores. El frontend consume
-la API configurada en `VITE_API_URL`; las llamadas están agrupadas por dominio en
-`src/features/*/api.ts` y los componentes acceden a ellas mediante hooks.
+Para probar registro e inicio de sesión, configura una clave pública de Turnstile en `VITE_TURNSTILE_SITE_KEY`. Alternativamente, el bypass local se puede habilitar únicamente en Vite en modo desarrollo:
 
-VITE_API_URL=http://localhost:8080/api
-VITE_TURNSTILE_SITE_KEY=
+```dotenv
+VITE_DEV_CAPTCHA_BYPASS=true
+```
 
+El bypass también requiere `DEV_CAPTCHA_BYPASS=true` en el servicio Identity. No lo habilites en producción; el frontend solo lo muestra durante desarrollo y el backend debe aplicar su propia validación.
+
+### Probar la aplicación
+
+1. Inicia el API Gateway y los servicios backend siguiendo la [guía de implementación del backend](../docs/GUIA_IMPLEMENTACION_BACKEND.md).
+2. Ejecuta el frontend y abre `http://localhost:5173`.
+3. Prueba la navegación pública: feed, una ficha de obra, una publicación y un perfil.
+4. Registra una cuenta o inicia sesión para probar las funciones que requieren autenticación.
+5. Para probar la publicación, selecciona **Publicar**, ingresa el ID de una obra existente en el catálogo, elige publicación de obra o reseña, completa el texto y envía el formulario. La app navega a la publicación o ficha creada.
+
+Las operaciones que requieren sesión necesitan que el API Gateway permita credenciales y cookies desde el origen del frontend. Si una petición falla, revisa `VITE_API_URL`, que los servicios estén activos y los errores de red en las herramientas de desarrollador del navegador.
+
+### Comprobaciones automatizadas
+
+No hay un script de pruebas unitarias o E2E configurado actualmente. Para comprobar tipos, compilación de producción y lint:
+
+```bash
+npm run build
+npm run lint
+```
+
+El build puede mostrar un aviso de tamaño del bundle; la compilación sigue siendo válida si el comando termina correctamente.
 
 ### Paleta de colores:
 

@@ -177,7 +177,7 @@ export default function ItemPage() {
         </div>
       )}
 
-      <Tabs tabs={tabs} active={tab} onChange={setTab} />
+      <Tabs<ItemTab> tabs={tabs} active={tab} onChange={setTab} />
 
       {tab === "reviews" &&
         (reviews && reviews.length > 0 ? (

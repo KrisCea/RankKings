@@ -58,7 +58,7 @@ export default function Profile() {
     <div className="mx-auto w-full max-w-3xl">
       <ProfileHeader profile={profile} isOwnProfile={isOwnProfile} />
 
-      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+      <Tabs<ProfileTab> tabs={TABS} active={tab} onChange={setTab} />
 
       <PostList posts={posts ?? []} isLoading={postsLoading} emptyMessage={emptyMessage} />
     </div>

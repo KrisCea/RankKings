@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import CreatePost from "../pages/CreatePost/CreatePost";
 import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: "profile/:username", element: <Profile /> },
       { path: "movie/:id", element: <MovieDetail /> },
       { path: "post/:id", element: <PostPage /> },
+      { path: "create-post", element: <CreatePost /> },
       { path: "item/:id", element: <ItemPage /> },
       { path: "library", element: <LibraryPage /> },
       { path: "verify-email", element: <VerifyEmailPage /> },

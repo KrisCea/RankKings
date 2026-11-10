@@ -7,7 +7,16 @@ interface CaptchaFieldProps {
 }
 
 export default function CaptchaField({ onChange, error }: CaptchaFieldProps) {
-  const widget = CAPTCHA_SITE_KEY ? (
+  const localBypass = import.meta.env.DEV && import.meta.env.VITE_DEV_CAPTCHA_BYPASS === "true";
+  const widget = localBypass ? (
+    <button
+      type="button"
+      onClick={() => onChange("local-development-only")}
+      className="rounded border border-yellow-500/50 p-2 text-sm"
+    >
+      Modo local: confirmar captcha de prueba
+    </button>
+  ) : CAPTCHA_SITE_KEY ? (
     <Turnstile
       siteKey={CAPTCHA_SITE_KEY}
       onSuccess={(token) => onChange(token)}

@@ -51,13 +51,14 @@ export default function Navbar() {
               className="w-full rounded-full border border-foreground/10 bg-background py-2 pl-9 pr-4 text-sm text-foreground outline-none transition-colors focus:border-primary"
             />
           </div>
-          <button
+          <Link
+            to="/create-post"
             aria-label="Publicar"
             title="Publicar"
             className="flex aspect-square h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-transform hover:scale-105"
           >
             <Plus size={18} />
-          </button>
+          </Link>
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-3">
@@ -70,12 +71,13 @@ export default function Navbar() {
             <Search size={18} />
           </button>
 
-          <button
+          <Link
+            to="/create-post"
             aria-label="Publicar"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white md:hidden"
           >
             <Plus size={18} />
-          </button>
+          </Link>
           
           <button
             onClick={toggleTheme}
