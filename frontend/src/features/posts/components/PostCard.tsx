@@ -122,34 +122,42 @@ export default function PostCard({
           </PostLink>
         </div>
       ) : (
-        <PostLink to={destination} enabled={isPreview} className="block">
-          {post.media[0] && (
-            <PostMediaFrame
-              media={post.media[0]}
-              alt={post.rankableItem.title}
-              expanded={expanded}
-            />
-          )}
+        <div>
+          <PostLink to={destination} enabled={isPreview} className="block">
+            {post.media.filter((media) => media.type === "image").map((media) => (
+              <PostMediaFrame
+                key={media.id}
+                media={media}
+                alt={post.rankableItem.title}
+                expanded={expanded}
+              />
+            ))}
 
-          <div className="px-4 pt-4">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <h3 className="font-semibold text-foreground lg:text-lg">
-                  {post.rankableItem.title}
-                </h3>
-                <p className="text-xs text-foreground/50">
-                  {post.rankableItem.creator.name}
-                  {post.rankableItem.year && ` · ${post.rankableItem.year}`}
-                </p>
+            <div className="px-4 pt-4">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-semibold text-foreground lg:text-lg">
+                    {post.rankableItem.title}
+                  </h3>
+                  <p className="text-xs text-foreground/50">
+                    {post.rankableItem.creator.name}
+                    {post.rankableItem.year && ` · ${post.rankableItem.year}`}
+                  </p>
+                </div>
+                <VerificationBadge status={post.rankableItem.verificationStatus} />
               </div>
-              <VerificationBadge status={post.rankableItem.verificationStatus} />
-            </div>
 
-            <p className={`text-sm text-foreground/80 lg:text-base ${captionClamp}`}>
-              {post.caption}
-            </p>
-          </div>
-        </PostLink>
+              <p className={`text-sm text-foreground/80 lg:text-base ${captionClamp}`}>
+                {post.caption}
+              </p>
+            </div>
+          </PostLink>
+          {post.media.filter((media) => media.type !== "image").map((media) => (
+            <div key={media.id} className="px-4">
+              <PostMediaFrame media={media} alt={post.rankableItem.title} expanded={expanded} />
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Acciones: fuera del link para que cada botón funcione por separado */}

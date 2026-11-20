@@ -1,5 +1,6 @@
 import { api } from "../../lib/axios";
-import type { Post, PostKind } from "../../types/post";
+import type { Review } from "../../types/comment";
+import type { Post } from "../../types/post";
 
 export async function getPosts(): Promise<Post[]> {
   const { data } = await api.get<Post[]>("/posts");
@@ -16,8 +17,13 @@ export async function getPostById(postId: string): Promise<Post> {
   return data;
 }
 
-export async function getReviewsForItem(itemId: string): Promise<Post[]> {
-  const { data } = await api.get<Post[]>(`/items/${itemId}/reviews`);
+export async function getReviewsForItem(itemId: string): Promise<Review[]> {
+  const { data } = await api.get<Review[]>(`/items/${encodeURIComponent(itemId)}/reviews`);
+  return data;
+}
+
+export async function getItemPost(itemId: string): Promise<Post> {
+  const { data } = await api.get<Post>(`/posts/by-item/${encodeURIComponent(itemId)}`);
   return data;
 }
 
@@ -41,16 +47,65 @@ export async function sharePost(postId: string, recipientId: string): Promise<Po
   return data;
 }
 
-export async function getPostsByAuthor(username: string, kind: PostKind): Promise<Post[]> {
-  const { data } = await api.get<Post[]>(`/users/${username}/posts`, { params: { kind } });
+export async function getPostsByAuthor(username: string): Promise<Post[]> {
+  const { data } = await api.get<Post[]>(`/users/${encodeURIComponent(username)}/posts`, {
+    params: { kind: "item" },
+  });
   return data;
+}
+
+export async function getReviewsByAuthor(username: string): Promise<Review[]> {
+  const { data } = await api.get<Review[]>(`/users/${encodeURIComponent(username)}/posts`, {
+    params: { kind: "review" },
+  });
+  return data;
+}
+
+export async function addReview(
+  postId: string,
+  input: { text: string; authorScore?: number }
+): Promise<Review> {
+  const { data } = await api.post<Review>(`/posts/${encodeURIComponent(postId)}/reviews`, input);
+  return data;
+}
+
+export interface ImageUploadUrl {
+  mediaId: string;
+  uploadUrl: string;
+  method: "PUT";
+  headers: Record<string, string>;
+  expiresAt: string;
+}
+
+export async function uploadPostImage(postId: string, file: File): Promise<void> {
+  const { data: upload } = await api.post<ImageUploadUrl>(
+    `/posts/${encodeURIComponent(postId)}/media/uploads`,
+    { contentType: file.type, sizeBytes: file.size }
+  );
+  const response = await fetch(upload.uploadUrl, {
+    method: upload.method,
+    headers: upload.headers,
+    body: file,
+  });
+  if (!response.ok) {
+    throw new Error(`S3 rechazó la carga de la imagen (HTTP ${response.status}).`);
+  }
+  await api.post(
+    `/posts/${encodeURIComponent(postId)}/media/${encodeURIComponent(upload.mediaId)}/complete`
+  );
+}
+
+export async function addExternalMedia(
+  postId: string,
+  input: { url: string; type: "video" | "external" }
+): Promise<void> {
+  await api.post(`/posts/${encodeURIComponent(postId)}/media/external`, input);
 }
 
 export interface NewPostInput {
   itemId: string;
-  kind: "item" | "review";
+  kind: "item";
   caption: string;
-  authorScore?: number;
 }
 
 export async function createPost(input: NewPostInput): Promise<Post> {

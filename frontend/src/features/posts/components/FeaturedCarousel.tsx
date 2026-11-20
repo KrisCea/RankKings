@@ -68,34 +68,39 @@ export default function FeaturedCarousel() {
         ref={scrollRef}
         className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        {posts.map((post) => (
-          <Link
-            key={post.id}
-            to={`/item/${post.rankableItem.id}`}
-            data-theme={post.category}
-            className={`relative shrink-0 w-full ${SLIDE_SIZE} rounded-xl overflow-hidden snap-start`}
-          >
-            <img
-              src={post.media[0]?.url ?? post.rankableItem.coverUrl}
-              alt={post.rankableItem.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        {posts.map((post) => {
+          const image = post.media.find(
+            (media) => media.type === "image" && media.id !== `${post.id}-cover`
+          ) ?? post.media.find((media) => media.type === "image");
+          return (
+            <Link
+              key={post.id}
+              to={`/item/${post.rankableItem.id}`}
+              data-theme={post.category}
+              className={`relative shrink-0 w-full ${SLIDE_SIZE} rounded-xl overflow-hidden snap-start`}
+            >
+              <img
+                src={image?.url ?? post.rankableItem.coverUrl}
+                alt={post.rankableItem.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-              <div className="mb-1 flex items-center gap-1 text-xs text-white/90 md:text-sm">
-                <Star size={14} className="text-primary" fill="currentColor" />
-                {post.averageRating.toFixed(1)}
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+                <div className="mb-1 flex items-center gap-1 text-xs text-white/90 md:text-sm">
+                  <Star size={14} className="text-primary" fill="currentColor" />
+                  {post.averageRating.toFixed(1)}
+                </div>
+                <h3 className="line-clamp-2 text-base font-semibold leading-tight text-white md:text-xl lg:text-2xl">
+                  {post.rankableItem.title}
+                </h3>
+                <p className="mt-0.5 text-xs text-white/70 md:text-sm">
+                  {post.rankableItem.creator.name}
+                </p>
               </div>
-              <h3 className="line-clamp-2 text-base font-semibold leading-tight text-white md:text-xl lg:text-2xl">
-                {post.rankableItem.title}
-              </h3>
-              <p className="mt-0.5 text-xs text-white/70 md:text-sm">
-                {post.rankableItem.creator.name}
-              </p>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       <button

@@ -9,8 +9,11 @@ interface GalleryItemProps {
 
 export default function GalleryItem({ post, onSelect }: GalleryItemProps) {
   const VoteIcon = CATEGORY_CONFIG[post.category].likeIcon;
-  const firstMedia = post.media[0];
-  const cover = firstMedia?.thumbnailUrl ?? firstMedia?.url ?? post.rankableItem.coverUrl;
+  const firstMedia = post.media.find((media) => media.type === "video");
+  const image = post.media.find(
+    (media) => media.type === "image" && media.id !== `${post.id}-cover`
+  ) ?? post.media.find((media) => media.type === "image");
+  const cover = image?.thumbnailUrl ?? image?.url ?? post.rankableItem.coverUrl;
 
   return (
     <button

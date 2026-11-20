@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { isAxiosError } from "axios";
 import { ArrowLeft, Star } from "lucide-react";
 import Tabs, { type TabItem } from "../../components/ui/Tabs";
-import PostCard from "../../features/posts/components/PostCard";
+import PostMediaFrame from "../../features/posts/components/PostMediaFrame";
+import ReviewList from "../../features/posts/components/ReviewList";
 import PostActions from "../../features/posts/components/PostActions";
 import VerificationBadge from "../../features/posts/components/VerificationBadge";
 import ItemDetails from "../../features/posts/components/ItemDetails";
@@ -14,13 +16,15 @@ import SharePanel from "../../features/share/components/SharePanel";
 import { useItem } from "../../features/items/hooks/useItem";
 import { useItemChildren } from "../../features/items/hooks/useItemChildren";
 import { useItemReviews } from "../../features/posts/hooks/useItemReviews";
-import { usePost } from "../../features/posts/hooks/usePost";
+import { useItemPost } from "../../features/posts/hooks/useItemPost";
 import { useToggleVote } from "../../features/posts/hooks/useToggleVote";
 import { useRatePost } from "../../features/posts/hooks/useRatePost";
 import { useUnratePost } from "../../features/posts/hooks/useUnratePost";
+import { useToggleCommentLike } from "../../features/comments/hooks/useToggleCommentLike";
 import { CATEGORIES, CHILDREN_LABELS } from "../../categories/registry";
 import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 import SaveButton from "../../features/items/components/SaveButton";
+import { getErrorMessage } from "../../lib/errors";
 
 type ItemTab = "reviews" | "children" | "links" | "details";
 
@@ -35,15 +39,24 @@ export default function ItemPage() {
 
   const { data: item, isLoading, isError } = useItem(id);
   const { data: parent } = useItem(item?.parentId);
-  const { data: itemPost } = usePost(item?.postId);
+  const {
+    data: itemPost,
+    isLoading: itemPostLoading,
+    error: itemPostError,
+  } = useItemPost(item?.id);
   const { data: children, isLoading: childrenLoading } = useItemChildren(
     item && item.childrenCount > 0 ? item.id : undefined
   );
-  const { data: reviews } = useItemReviews(item?.id);
+  const {
+    data: reviews,
+    isLoading: reviewsLoading,
+    error: reviewsError,
+  } = useItemReviews(item?.id);
 
   const toggleVote = useToggleVote();
   const ratePost = useRatePost();
   const unratePost = useUnratePost();
+  const toggleReviewLike = useToggleCommentLike(itemPost?.id ?? "");
 
   const requireAuth = useRequireAuth();
 
@@ -74,6 +87,7 @@ export default function ItemPage() {
   }
 
   const childrenLabel = CHILDREN_LABELS[item.category];
+  const noItemPost = isAxiosError(itemPostError) && itemPostError.response?.status === 404;
   const directRating = itemPost?.averageRating ?? item.averageRating;
   const directCount = itemPost?.ratingsCount ?? item.ratingsCount;
 
@@ -136,6 +150,27 @@ export default function ItemPage() {
         <p className="mb-4 text-sm text-foreground/80">{item.description}</p>
       )}
 
+      {itemPost?.media
+        .filter((media) => media.id !== `${itemPost.id}-cover`)
+        .map((media) => (
+          <div key={media.id} className="mb-3">
+            <PostMediaFrame media={media} alt={item.title} expanded />
+          </div>
+        ))}
+
+      {!itemPostLoading && noItemPost && (
+        <Link
+          to="/create-post"
+          state={{ itemId: item.id, kind: "item" }}
+          className="mb-4 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-white"
+        >
+          Crear publicación para esta obra
+        </Link>
+      )}
+      {itemPostError && !noItemPost && (
+        <p role="alert" className="mb-4 text-sm text-red-500">{getErrorMessage(itemPostError)}</p>
+      )}
+
       {/* Puntuaciones: la directa y, si es colección, el promedio de sus hijos */}
       <div className="mb-4 flex gap-3">
         <div className="flex-1 rounded-xl border border-foreground/10 bg-surface p-3">
@@ -179,16 +214,27 @@ export default function ItemPage() {
 
       <Tabs<ItemTab> tabs={tabs} active={tab} onChange={setTab} />
 
-      {tab === "reviews" &&
-        (reviews && reviews.length > 0 ? (
-          reviews.map((review) => (
-            <PostCard key={review.id} post={review} showItem={false} {...handlers} />
-          ))
-        ) : (
-          <p className="py-8 text-center text-sm text-foreground/50">
-            Todavía no hay reseñas de este ítem.
-          </p>
-        ))}
+      {tab === "reviews" && (
+        <>
+          {itemPost && (
+            <Link
+              to="/create-post"
+              state={{ itemId: item.id, kind: "review" }}
+              className="mt-4 inline-flex rounded-full border border-primary px-4 py-2 text-sm font-medium text-primary"
+            >
+              Escribir reseña
+            </Link>
+          )}
+          <ReviewList
+            reviews={reviews ?? []}
+            item={item}
+            isLoading={itemPostLoading || reviewsLoading}
+            emptyMessage="Todavía no hay reseñas de este ítem."
+            errorMessage={reviewsError ? getErrorMessage(reviewsError) : undefined}
+            onToggleLike={requireAuth((reviewId: string) => toggleReviewLike.mutate(reviewId))}
+          />
+        </>
+      )}
 
       {tab === "children" && (
         <ItemChildrenList items={children ?? []} isLoading={childrenLoading} />

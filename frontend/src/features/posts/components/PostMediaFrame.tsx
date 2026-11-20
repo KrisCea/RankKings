@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 import type { PostMedia } from "../../../types/post";
 
 // Proporción cuando el post no tiene foco (formato cine)
@@ -23,6 +24,21 @@ export default function PostMediaFrame({ media, alt, expanded }: PostMediaFrameP
   const declaredRatio = media.width && media.height ? media.width / media.height : null;
   const naturalRatio = loadedRatio ?? declaredRatio ?? 1;
   const expandedRatio = clamp(naturalRatio, MIN_EXPANDED_RATIO, MAX_EXPANDED_RATIO);
+
+  if (media.type !== "image") {
+    const label = media.type === "video" ? "Ver video externo" : "Abrir enlace externo";
+    return (
+      <a
+        href={media.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="my-2 flex items-center justify-between gap-3 rounded-lg border border-foreground/10 bg-surface px-4 py-3 text-sm text-primary hover:bg-primary/5"
+      >
+        <span>{label}</span>
+        <ExternalLink size={16} aria-hidden="true" />
+      </a>
+    );
+  }
 
   return (
     <div

@@ -66,13 +66,17 @@ Abre la URL que muestra Vite (por defecto `http://localhost:5173`).
 
 ### CAPTCHA en desarrollo
 
-Para probar registro e inicio de sesión, configura una clave pública de Turnstile en `VITE_TURNSTILE_SITE_KEY`. Alternativamente, el bypass local se puede habilitar únicamente en Vite en modo desarrollo:
+Por defecto, Vite omite el widget sólo en desarrollo cuando `VITE_API_URL` apunta a `localhost` o `127.0.0.1`; el backend requiere `DEV_CAPTCHA_BYPASS=true` y el perfil `local` o `test`. El frontend no permite omitir captcha cuando el API apunta a un host remoto.
 
 ```dotenv
 VITE_DEV_CAPTCHA_BYPASS=true
 ```
 
-El bypass también requiere `DEV_CAPTCHA_BYPASS=true` en el servicio Identity. No lo habilites en producción; el frontend solo lo muestra durante desarrollo y el backend debe aplicar su propia validación.
+Para probar Turnstile de verdad, configura `VITE_TURNSTILE_SITE_KEY` y `VITE_DEV_CAPTCHA_BYPASS=false` en el frontend, además de `TURNSTILE_SECRET` y `DEV_CAPTCHA_BYPASS=false` en Identity. No habilites bypass en producción.
+
+### Verificación de correo
+
+En modo local, por defecto Identity imprime el enlace de verificación en su consola. Para enviar un correo real, configura `RESEND_API_KEY`, `VERIFICATION_FROM_EMAIL` (remitente verificado con Resend) y `VERIFICATION_URL` en el backend. Define `DEV_VERIFICATION_LOGGING=false` en Identity y `VITE_DEV_VERIFICATION_LOGGING=false` en el frontend para que el flujo muestre mensajes de correo enviado. `start-local.ps1` respeta los valores `false` definidos antes de ejecutarlo. No guardes secretos en el repositorio.
 
 ### Probar la aplicación
 
@@ -80,9 +84,11 @@ El bypass también requiere `DEV_CAPTCHA_BYPASS=true` en el servicio Identity. N
 2. Ejecuta el frontend y abre `http://localhost:5173`.
 3. Prueba la navegación pública: feed, una ficha de obra, una publicación y un perfil.
 4. Registra una cuenta o inicia sesión para probar las funciones que requieren autenticación.
-5. Para probar la publicación, selecciona **Publicar**, ingresa el ID de una obra existente en el catálogo, elige publicación de obra o reseña, completa el texto y envía el formulario. La app navega a la publicación o ficha creada.
+5. Para probar una publicación, selecciona **Publicar**, ingresa el ID de una obra existente en el catálogo y completa el texto. Las imágenes se envían a S3 después de crear el post; los videos y enlaces externos se registran como enlaces HTTPS y se abren fuera de RankKings. Para escribir una reseña, selecciona **Reseña**: se asociará como comentario al post existente de la obra.
 
 Las operaciones que requieren sesión necesitan que el API Gateway permita credenciales y cookies desde el origen del frontend. Si una petición falla, revisa `VITE_API_URL`, que los servicios estén activos y los errores de red en las herramientas de desarrollador del navegador.
+
+Las imágenes admitidas son JPEG, PNG y WebP, hasta 10 MiB por archivo, cuatro adjuntos en total y 20 MiB de imágenes. La carga requiere que Social tenga configurado S3 y que el bucket permita `PUT` desde el origen del frontend con los encabezados `Content-Type` e `If-None-Match`. Los videos no se suben ni se incrustan: solo se guardan enlaces HTTPS externos. Solo el autor de la publicación de obra puede adjuntar o eliminar sus medios.
 
 ### Comprobaciones automatizadas
 

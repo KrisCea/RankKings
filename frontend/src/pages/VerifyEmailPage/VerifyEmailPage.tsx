@@ -4,6 +4,7 @@ import { BadgeCheck, Mail, ShieldAlert } from "lucide-react";
 import AuthPageLayout from "../../features/auth/components/AuthPageLayout";
 import ResendVerification from "../../features/auth/components/ResendVerification";
 import { useVerifyEmail } from "../../features/auth/hooks/useVerifyEmail";
+import { IS_LOCAL_VERIFICATION_LOGGING } from "../../features/auth/captcha";
 import { getErrorMessage } from "../../lib/errors";
 
 interface VerifyEmailState {
@@ -74,17 +75,32 @@ export default function VerifyEmailPage() {
       title="Revisa tu correo"
       icon={<Mail size={40} className="text-primary" />}
       description={
-        <>
-          {state?.email ? (
-            <>
-              Te enviamos un enlace de verificación a{" "}
-              <strong className="text-foreground">{state.email}</strong>.
-            </>
-          ) : (
-            "Usa el enlace de verificación que te enviamos."
-          )}{" "}
-          Revisa también la carpeta de spam.
-        </>
+        IS_LOCAL_VERIFICATION_LOGGING ? (
+          <>
+            {state?.email ? (
+              <>
+                La cuenta de <strong className="text-foreground">{state.email}</strong> quedó
+                pendiente de verificación.
+              </>
+            ) : (
+              "La cuenta quedó pendiente de verificación."
+            )}{" "}
+            El backend local no envía correo: abre el enlace que aparece en la consola del servicio
+            Identity.
+          </>
+        ) : (
+          <>
+            {state?.email ? (
+              <>
+                Te enviamos un enlace de verificación a{" "}
+                <strong className="text-foreground">{state.email}</strong>.
+              </>
+            ) : (
+              "Usa el enlace de verificación que te enviamos."
+            )}{" "}
+            Revisa también la carpeta de spam.
+          </>
+        )
       }
     >
       <div className="flex flex-col gap-4">

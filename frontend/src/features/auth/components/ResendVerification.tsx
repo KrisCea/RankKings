@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import TextField from "../../../components/ui/TextField";
+import { IS_LOCAL_VERIFICATION_LOGGING } from "../captcha";
 import { useResendVerification } from "../hooks/useResendVerification";
 import { getErrorMessage } from "../../../lib/errors";
 
@@ -46,7 +47,9 @@ export default function ResendVerification({ defaultEmail }: ResendVerificationP
 
       {sent && (
         <p role="status" className="rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
-          Si hay una cuenta pendiente con ese correo, te enviamos un enlace nuevo.
+          {IS_LOCAL_VERIFICATION_LOGGING
+            ? "Se generó un enlace nuevo; revisa la consola del servicio Identity."
+            : "Si hay una cuenta pendiente con ese correo, te enviamos un enlace nuevo."}
         </p>
       )}
 
@@ -66,7 +69,9 @@ export default function ResendVerification({ defaultEmail }: ResendVerificationP
           ? "Enviando..."
           : cooldown > 0
             ? `Reenviar en ${cooldown} s`
-            : "Reenviar correo de verificación"}
+            : IS_LOCAL_VERIFICATION_LOGGING
+              ? "Generar enlace de verificación"
+              : "Reenviar correo de verificación"}
       </button>
     </div>
   );

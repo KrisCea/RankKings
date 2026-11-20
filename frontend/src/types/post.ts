@@ -2,7 +2,7 @@ import type { CategoryId } from "../categories/types";
 import type { UserSummary } from "./user";
 import type { RankableItem } from "./rankableItem";
 
-export type MediaType = "image" | "video";
+export type MediaType = "image" | "video" | "external";
 
 export interface PostMedia {
   id: string;

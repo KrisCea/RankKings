@@ -7,9 +7,17 @@ export function syncPostInCache(queryClient: QueryClient, updated: Post) {
 
   queryClient.setQueryData<Post[]>(["posts"], replace);
   queryClient.setQueryData<Post[]>(["featuredPosts"], replace);
-  queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, replace);
-  queryClient.setQueriesData<Post[]>({ queryKey: ["userPosts"] }, replace);
+  queryClient.setQueriesData<Post[]>(
+    {
+      predicate: (query) =>
+        query.queryKey[0] === "userPosts" && query.queryKey[2] === "item",
+    },
+    replace
+  );
   queryClient.setQueryData<Post>(["post", updated.id], updated);
+  queryClient.setQueryData<Post>(["itemPost", updated.rankableItem.id], (old) =>
+    old?.id === updated.id ? updated : old
+  );
 
   // La puntuación de un post de ítem es la del propio ítem: mantiene su ficha sincronizada
   if (updated.kind === "item") {

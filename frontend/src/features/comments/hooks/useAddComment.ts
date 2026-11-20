@@ -21,9 +21,11 @@ export function useAddComment(postId: string) {
 
       queryClient.setQueryData<Post[]>(["posts"], patch);
       queryClient.setQueryData<Post[]>(["featuredPosts"], patch);
-      queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, patch);
-      queryClient.setQueriesData<Post[]>({ queryKey: ["userPosts"] }, patch);
       queryClient.setQueryData<Post>(["post", postId], (old) => (old ? addOne(old) : old));
+      queryClient.setQueriesData<Post>(
+        { queryKey: ["itemPost"] },
+        (old) => (old?.id === postId ? addOne(old) : old)
+      );
     },
   });
 }

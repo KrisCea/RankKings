@@ -9,6 +9,7 @@ import AuthPageLayout from "../../features/auth/components/AuthPageLayout";
 import CaptchaField from "../../features/auth/components/CaptchaField";
 import PasswordStrengthMeter from "../../features/auth/components/PasswordStrengthMeter";
 import { containsPersonalInfo, passwordSchema } from "../../features/auth/password";
+import { IS_LOCAL_CAPTCHA_BYPASS } from "../../features/auth/captcha";
 import { useRegister } from "../../features/auth/hooks/useRegister";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { getErrorMessage } from "../../lib/errors";
@@ -22,7 +23,16 @@ const schema = z
     email: z.string().email("Ingresa un correo válido"),
     password: passwordSchema,
     confirmPassword: z.string(),
-    captchaToken: z.string().min(1, "Confirma que no eres un robot"),
+    captchaToken: z.string(),
+  })
+  .superRefine((data, context) => {
+    if (!IS_LOCAL_CAPTCHA_BYPASS && !data.captchaToken) {
+      context.addIssue({
+        code: "custom",
+        message: "Confirma que no eres un robot",
+        path: ["captchaToken"],
+      });
+    }
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -40,7 +50,8 @@ export default function Register() {
   const navigate = useNavigate();
   const from = (location.state as { from?: string } | null)?.from ?? "/";
 
-  // El token del captcha es de un solo uso: al fallar el registro se vuelve a montar el widget
+  // El token del captcha es de un solo uso: al fallar el registro se vuelve a montar el widget.
+  // No se necesita un widget cuando el bypass local está habilitado.
   const [captchaKey, setCaptchaKey] = useState(0);
 
   const { data: currentUser, isLoading } = useCurrentUser();

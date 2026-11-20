@@ -20,13 +20,19 @@ export function syncItemInCache(queryClient: QueryClient, updated: RankableItem)
   queryClient.setQueriesData<RankableItem[]>({ queryKey: ["itemChildren"] }, (old) =>
     old?.map(patchItem)
   );
-  queryClient.setQueriesData<Post[]>({ queryKey: ["userPosts"] }, (old) => old?.map(patchPost));
+  queryClient.setQueriesData<Post[]>(
+    {
+      predicate: (query) =>
+        query.queryKey[0] === "userPosts" && query.queryKey[2] === "item",
+    },
+    (old) => old?.map(patchPost)
+  );
   queryClient.setQueryData<Post[]>(["posts"], (old) => old?.map(patchPost));
   queryClient.setQueryData<Post[]>(["featuredPosts"], (old) => old?.map(patchPost));
-  queryClient.setQueriesData<Post[]>({ queryKey: ["itemReviews"] }, (old) =>
-    old?.map(patchPost)
-  );
   queryClient.setQueriesData<Post>({ queryKey: ["post"] }, (old) =>
+    old ? patchPost(old) : old
+  );
+  queryClient.setQueriesData<Post>({ queryKey: ["itemPost"] }, (old) =>
     old ? patchPost(old) : old
   );
 }

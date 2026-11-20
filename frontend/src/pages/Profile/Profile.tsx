@@ -3,10 +3,14 @@ import { Link, useParams } from "react-router-dom";
 import Tabs, { type TabItem } from "../../components/ui/Tabs";
 import ProfileHeader from "../../features/users/components/ProfileHeader";
 import PostList from "../../features/posts/components/PostList";
+import ReviewList from "../../features/posts/components/ReviewList";
 import { useUserProfile } from "../../features/users/hooks/useUserProfile";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { useUserPosts } from "../../features/posts/hooks/useUserPosts";
-import type { PostKind } from "../../types/post";
+import { useUserReviews } from "../../features/posts/hooks/useUserReviews";
+import { useToggleCommentLike } from "../../features/comments/hooks/useToggleCommentLike";
+import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
+import { getErrorMessage } from "../../lib/errors";
 
 type ProfileTab = "posts" | "reviews";
 
@@ -15,18 +19,20 @@ const TABS: TabItem<ProfileTab>[] = [
   { id: "reviews", label: "Reseñas" },
 ];
 
-const KIND_BY_TAB: Record<ProfileTab, PostKind> = {
-  posts: "item",
-  reviews: "review",
-};
-
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
   const [tab, setTab] = useState<ProfileTab>("posts");
 
   const { data: profile, isLoading, isError } = useUserProfile(username ?? null);
   const { data: currentUser } = useCurrentUser();
-  const { data: posts, isLoading: postsLoading } = useUserPosts(username, KIND_BY_TAB[tab]);
+  const { data: posts, isLoading: postsLoading } = useUserPosts(username, tab === "posts");
+  const {
+    data: reviews,
+    isLoading: reviewsLoading,
+    error: reviewsError,
+  } = useUserReviews(username, tab === "reviews");
+  const toggleReviewLike = useToggleCommentLike("");
+  const requireAuth = useRequireAuth();
 
   if (isLoading) {
     return <div className="mx-auto h-56 max-w-3xl animate-pulse rounded-2xl bg-surface" />;
@@ -60,7 +66,17 @@ export default function Profile() {
 
       <Tabs<ProfileTab> tabs={TABS} active={tab} onChange={setTab} />
 
-      <PostList posts={posts ?? []} isLoading={postsLoading} emptyMessage={emptyMessage} />
+      {tab === "posts" ? (
+        <PostList posts={posts ?? []} isLoading={postsLoading} emptyMessage={emptyMessage} />
+      ) : (
+        <ReviewList
+          reviews={reviews ?? []}
+          isLoading={reviewsLoading}
+          emptyMessage={emptyMessage}
+          errorMessage={reviewsError ? getErrorMessage(reviewsError) : undefined}
+          onToggleLike={requireAuth((reviewId: string) => toggleReviewLike.mutate(reviewId))}
+        />
+      )}
     </div>
   );
 }
