@@ -13,6 +13,7 @@ import CommentsPanel from "../../features/comments/components/CommentsPanel";
 import SharePanel from "../../features/share/components/SharePanel";
 import Modal from "../../components/ui/Modal";
 import type { FeedViewMode } from "../../types/view";
+import { getErrorMessage } from "../../lib/errors";
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<FeedViewMode>("posts");
@@ -20,7 +21,7 @@ export default function Home() {
   const [activeSharePostId, setActiveSharePostId] = useState<string | null>(null);
   const [galleryPostId, setGalleryPostId] = useState<string | null>(null);
 
-  const { data: posts, isLoading } = usePosts();
+  const { data: posts, isLoading, isError, error } = usePosts();
   const toggleVote = useToggleVote();
   const ratePost = useRatePost();
   const unratePost = useUnratePost();
@@ -58,6 +59,16 @@ export default function Home() {
           className="mx-auto w-full max-w-2xl lg:max-w-3xl 2xl:max-w-4xl"
         >
           {isLoading && <p className="text-foreground/60">Cargando...</p>}
+          {isError && (
+            <p role="alert" className="py-8 text-center text-sm text-red-500">
+              No se pudieron cargar las publicaciones: {getErrorMessage(error)}
+            </p>
+          )}
+          {!isLoading && !isError && posts?.length === 0 && (
+            <p className="py-12 text-center text-sm text-foreground/60">
+              Todavía no hay publicaciones disponibles.
+            </p>
+          )}
           {posts?.map((post) => (
             <PostCard
               key={post.id}
@@ -74,11 +85,17 @@ export default function Home() {
       )}
 
       {viewMode === "gallery" && (
-        <GalleryView
-          posts={posts ?? []}
-          isLoading={isLoading}
-          onSelectPost={setGalleryPostId}
-        />
+        isError ? (
+          <p role="alert" className="py-8 text-center text-sm text-red-500">
+            No se pudieron cargar las publicaciones: {getErrorMessage(error)}
+          </p>
+        ) : (
+          <GalleryView
+            posts={posts ?? []}
+            isLoading={isLoading}
+            onSelectPost={setGalleryPostId}
+          />
+        )
       )}
 
       {/* Orden importa: los paneles que se abren desde el modal van después, para quedar encima */}

@@ -5,6 +5,7 @@ import { ArrowLeft, Star } from "lucide-react";
 import Tabs, { type TabItem } from "../../components/ui/Tabs";
 import PostMediaFrame from "../../features/posts/components/PostMediaFrame";
 import ReviewList from "../../features/posts/components/ReviewList";
+import CreateReviewForm from "../../features/posts/components/CreateReviewForm";
 import PostActions from "../../features/posts/components/PostActions";
 import VerificationBadge from "../../features/posts/components/VerificationBadge";
 import ItemDetails from "../../features/posts/components/ItemDetails";
@@ -34,6 +35,7 @@ export default function ItemPage() {
   const location = useLocation();
 
   const [tab, setTab] = useState<ItemTab>("reviews");
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [sharePostId, setSharePostId] = useState<string | null>(null);
 
@@ -217,13 +219,21 @@ export default function ItemPage() {
       {tab === "reviews" && (
         <>
           {itemPost && (
-            <Link
-              to="/create-post"
-              state={{ itemId: item.id, kind: "review" }}
+            <button
+              type="button"
+              onClick={requireAuth(() => setShowReviewForm(true))}
               className="mt-4 inline-flex rounded-full border border-primary px-4 py-2 text-sm font-medium text-primary"
             >
-              Escribir reseña
-            </Link>
+              Crear reseña
+            </button>
+          )}
+          {itemPost && showReviewForm && (
+            <CreateReviewForm
+              itemId={item.id}
+              postId={itemPost.id}
+              onCancel={() => setShowReviewForm(false)}
+              onCreated={() => setShowReviewForm(false)}
+            />
           )}
           <ReviewList
             reviews={reviews ?? []}

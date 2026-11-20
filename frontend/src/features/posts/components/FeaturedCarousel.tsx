@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useFeaturedPosts } from "../hooks/useFeaturedPosts";
+import { getErrorMessage } from "../../../lib/errors";
 
 // Tamaño de cada slide: más alto en móvil, panorámico en pantallas medianas y grandes.
 // El tope de altura evita que en pantallas enormes el slider ocupe más que la ventana.
 const SLIDE_SIZE = "aspect-[4/3] md:aspect-[16/9] max-h-[70vh]";
 
 export default function FeaturedCarousel() {
-  const { data: posts, isLoading } = useFeaturedPosts();
+  const { data: posts, isLoading, isError, error } = useFeaturedPosts();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -49,6 +50,14 @@ export default function FeaturedCarousel() {
   if (isLoading) {
     return (
       <div className={`${SLIDE_SIZE} mb-6 w-full animate-pulse rounded-xl bg-surface`} />
+    );
+  }
+
+  if (isError) {
+    return (
+      <p role="alert" className="mb-6 text-center text-sm text-red-500">
+        No se pudieron cargar las publicaciones destacadas: {getErrorMessage(error)}
+      </p>
     );
   }
 

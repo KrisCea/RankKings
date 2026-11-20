@@ -3,15 +3,71 @@ info:
   title: RankKings Catalog Service API
   version: 1.0.0
   description: >-
-    Lectura del catálogo de obras. El gateway publica estas rutas bajo /api y
-    las reenvía al catálogo. X-User-Id es un encabezado interno que solo debe
-    inyectar el gateway tras validar la sesión.
+    Lectura y creación del catálogo de obras. El gateway publica estas rutas
+    bajo /api y las reenvía al catálogo. X-User-Id es un encabezado interno
+    que solo debe inyectar el gateway tras validar la sesión.
 servers:
   - url: http://localhost:8080/api
     description: API Gateway local
 tags:
   - name: Items
 paths:
+  /items:
+    post:
+      tags: [Items]
+      operationId: createItem
+      summary: Crear una obra con portada
+      description: >-
+        El servidor genera el ID interno y la URL de portada. Los identificadores
+        específicos de la categoría se envían separados y no sustituyen el ID.
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [category, title, creatorName, identifiers, cover]
+              properties:
+                category:
+                  $ref: "#/components/schemas/CategoryId"
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                creatorName:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 2000
+                year:
+                  type: integer
+                  minimum: 1
+                  maximum: 9999
+                identifiers:
+                  type: string
+                  description: Objeto JSON con los identificadores propios de la categoría.
+                cover:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Obra creada con ID y URL de portada generados por el servidor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RankableItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /items/{itemId}:
     get:
       tags: [Items]
@@ -81,6 +137,18 @@ components:
         type: string
         minLength: 1
   responses:
+    BadRequest:
+      description: Solicitud inválida.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Unauthorized:
+      description: Sesión ausente, inválida o expirada.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
     NotFound:
       description: Obra o colección no encontrada.
       content:

@@ -4,6 +4,7 @@ import Avatar from "../../../components/ui/Avatar";
 import UserHoverCard from "../../users/components/UserHoverCard";
 import type { RankableItem } from "../../../types/rankableItem";
 import type { Review } from "../../../types/comment";
+import PostMediaFrame from "./PostMediaFrame";
 
 interface ReviewCardProps {
   review: Review;
@@ -45,6 +46,11 @@ export default function ReviewCard({ review, item, onToggleLike }: ReviewCardPro
       )}
 
       <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/80">{review.text}</p>
+      {review.media?.map((media) => (
+        <div key={media.id} className="mt-3">
+          <PostMediaFrame media={media} alt={`Contenido de la reseña de ${review.author.username}`} expanded />
+        </div>
+      ))}
       <button
         type="button"
         onClick={() => onToggleLike(review.id)}

@@ -1,3 +1,5 @@
+import type { PostMedia } from "./post";
+
 export interface Comment {
   id: string;
   postId: string;
@@ -18,6 +20,7 @@ export interface Comment {
 
 export interface Review extends Comment {
   kind: "review";
+  media?: PostMedia[];
 }
 
 export interface NewCommentInput {

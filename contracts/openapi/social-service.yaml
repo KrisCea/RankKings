@@ -38,6 +38,47 @@ paths:
                   $ref: "#/components/schemas/Post"
         "500":
           $ref: "#/components/responses/ServerError"
+    post:
+      tags: [Posts]
+      operationId: createPost
+      summary: Crear una publicación para una obra
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [itemId, kind, caption]
+              properties:
+                itemId:
+                  type: string
+                  minLength: 1
+                kind:
+                  type: string
+                  enum: [item]
+                caption:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+      responses:
+        "201":
+          description: Publicación creada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /posts/featured:
     get:
       tags: [Posts]
@@ -114,7 +155,7 @@ paths:
       tags: [Posts]
       operationId: getReviewsForItem
       summary: Listar reseñas asociadas a una obra
-      description: La respuesta son publicaciones Post cuyo kind es review.
+      description: Cada reseña pertenece a la publicación principal de la obra y puede incluir contenido multimedia.
       security:
         - {}
         - SessionCookie: []
@@ -129,7 +170,151 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Post"
+                  $ref: "#/components/schemas/Review"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /posts/{postId}/reviews:
+    post:
+      tags: [Posts]
+      operationId: addReview
+      summary: Crear una reseña asociada a una publicación
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewReviewInput"
+      responses:
+        "201":
+          description: Reseña creada y asociada a la publicación.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /posts/{postId}/reviews/{reviewId}/media/uploads:
+    post:
+      tags: [Posts]
+      operationId: createReviewMediaUpload
+      summary: Preparar la carga de una imagen para una reseña
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/ReviewId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [contentType, sizeBytes]
+              properties:
+                contentType:
+                  type: string
+                  enum: [image/jpeg, image/png, image/webp]
+                sizeBytes:
+                  type: integer
+                  minimum: 1
+                  maximum: 10485760
+      responses:
+        "200":
+          description: URL temporal para cargar la imagen.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageUploadUrl"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /posts/{postId}/reviews/{reviewId}/media/{mediaId}/complete:
+    post:
+      tags: [Posts]
+      operationId: completeReviewMediaUpload
+      summary: Confirmar la carga de una imagen de reseña
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/ReviewId"
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Reseña con los medios actualizados.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /posts/{postId}/reviews/{reviewId}/media/external:
+    post:
+      tags: [Posts]
+      operationId: addReviewExternalMedia
+      summary: Añadir un video o enlace externo a una reseña
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/ReviewId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [url, type]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                type:
+                  type: string
+                  enum: [video, external]
+      responses:
+        "201":
+          description: Reseña con el enlace externo añadido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
         "500":
@@ -356,6 +541,13 @@ components:
       schema:
         type: string
         minLength: 1
+    ReviewId:
+      name: reviewId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
     ItemId:
       name: itemId
       in: path
@@ -542,7 +734,7 @@ components:
           format: uri
         type:
           type: string
-          enum: [image, video]
+          enum: [image, video, external]
         thumbnailUrl:
           type: string
           format: uri
@@ -639,6 +831,71 @@ components:
         avatarUrl:
           type: string
           format: uri
+    Review:
+      type: object
+      additionalProperties: false
+      required: [id, postId, kind, author, text, media, likesCount, likedByCurrentUser, createdAt]
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        kind:
+          type: string
+          enum: [review]
+        authorScore:
+          type: number
+          minimum: 1
+          maximum: 10
+        author:
+          $ref: "#/components/schemas/CommentAuthor"
+        text:
+          type: string
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostMedia"
+        likesCount:
+          type: integer
+          minimum: 0
+        likedByCurrentUser:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    NewReviewInput:
+      type: object
+      additionalProperties: false
+      required: [text, authorScore]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        authorScore:
+          type: number
+          minimum: 1
+          maximum: 10
+    ImageUploadUrl:
+      type: object
+      additionalProperties: false
+      required: [mediaId, uploadUrl, method, headers, expiresAt]
+      properties:
+        mediaId:
+          type: string
+        uploadUrl:
+          type: string
+          format: uri
+        method:
+          type: string
+          enum: [PUT]
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        expiresAt:
+          type: string
+          format: date-time
     Comment:
       type: object
       additionalProperties: false

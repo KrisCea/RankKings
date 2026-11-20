@@ -69,6 +69,26 @@ export async function addReview(
   return data;
 }
 
+export async function uploadReviewImage(
+  postId: string,
+  reviewId: string,
+  file: File
+): Promise<void> {
+  const path = `/posts/${encodeURIComponent(postId)}/reviews/${encodeURIComponent(reviewId)}/media`;
+  await uploadImage(`${path}/uploads`, `${path}/{mediaId}/complete`, file);
+}
+
+export async function addReviewExternalMedia(
+  postId: string,
+  reviewId: string,
+  input: { url: string; type: "video" | "external" }
+): Promise<void> {
+  await api.post(
+    `/posts/${encodeURIComponent(postId)}/reviews/${encodeURIComponent(reviewId)}/media/external`,
+    input
+  );
+}
+
 export interface ImageUploadUrl {
   mediaId: string;
   uploadUrl: string;
@@ -78,10 +98,15 @@ export interface ImageUploadUrl {
 }
 
 export async function uploadPostImage(postId: string, file: File): Promise<void> {
-  const { data: upload } = await api.post<ImageUploadUrl>(
-    `/posts/${encodeURIComponent(postId)}/media/uploads`,
-    { contentType: file.type, sizeBytes: file.size }
-  );
+  const path = `/posts/${encodeURIComponent(postId)}/media`;
+  await uploadImage(`${path}/uploads`, `${path}/{mediaId}/complete`, file);
+}
+
+async function uploadImage(uploadPath: string, completePath: string, file: File): Promise<void> {
+  const { data: upload } = await api.post<ImageUploadUrl>(uploadPath, {
+    contentType: file.type,
+    sizeBytes: file.size,
+  });
   const response = await fetch(upload.uploadUrl, {
     method: upload.method,
     headers: upload.headers,
@@ -90,9 +115,7 @@ export async function uploadPostImage(postId: string, file: File): Promise<void>
   if (!response.ok) {
     throw new Error(`S3 rechazó la carga de la imagen (HTTP ${response.status}).`);
   }
-  await api.post(
-    `/posts/${encodeURIComponent(postId)}/media/${encodeURIComponent(upload.mediaId)}/complete`
-  );
+  await api.post(completePath.replace("{mediaId}", encodeURIComponent(upload.mediaId)));
 }
 
 export async function addExternalMedia(
