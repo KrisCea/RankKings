@@ -40,11 +40,6 @@ export default function CommentsPanel({ postId, onClose }: CommentsPanelProps) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  // Al abrir otro post, descarta cualquier respuesta a medias
-  useEffect(() => {
-    setReplyTarget(null);
-  }, [postId]);
-
   const handleReply = requireAuth((comment: Comment) => {
     setReplyTarget({
       parentId: comment.parentId ?? comment.id,

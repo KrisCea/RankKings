@@ -76,6 +76,16 @@ export default function ProfileMenu() {
             {LIST_NAME}
           </Link>
 
+          {user.role === "admin" && (
+            <Link
+              to="/admin/moderation"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm hover:bg-surface"
+            >
+              Moderación
+            </Link>
+          )}
+
           <Link
             to="/settings"
             onClick={() => setOpen(false)}

@@ -11,6 +11,10 @@ export async function addComment(postId: string, input: NewCommentInput): Promis
   return data;
 }
 
+export async function deleteComment(commentId: string): Promise<void> {
+  await api.delete(`/comments/${encodeURIComponent(commentId)}`);
+}
+
 export async function toggleCommentLike(commentId: string): Promise<Comment> {
   const { data } = await api.post<Comment>(`/comments/${commentId}/like`);
   return data;

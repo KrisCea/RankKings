@@ -65,15 +65,18 @@ export default function PostPage() {
             onUnrate={requireAuth((postId: string) => unratePost.mutate(postId))}
             onOpenComments={() => setCommentsOpen(true)}
             onOpenShare={requireAuth(() => setShareOpen(true))}
+            onDeleted={() => navigate("/")}
           />
         </div>
       )}
 
       <CommentsPanel
+        key={`${post?.id ?? "closed"}-${commentsOpen}`}
         postId={commentsOpen && post ? post.id : null}
         onClose={() => setCommentsOpen(false)}
       />
       <SharePanel
+        key={`${post?.id ?? "closed"}-${shareOpen}`}
         postId={shareOpen && post ? post.id : null}
         onClose={() => setShareOpen(false)}
       />

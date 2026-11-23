@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { ArrowLeft, Star } from "lucide-react";
+import DeleteContentButton from "../../components/ui/DeleteContentButton";
 import Tabs, { type TabItem } from "../../components/ui/Tabs";
 import PostMediaFrame from "../../features/posts/components/PostMediaFrame";
 import ReviewList from "../../features/posts/components/ReviewList";
@@ -26,6 +27,7 @@ import { CATEGORIES, CHILDREN_LABELS } from "../../categories/registry";
 import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 import SaveButton from "../../features/items/components/SaveButton";
 import { getErrorMessage } from "../../lib/errors";
+import { deletePost } from "../../features/posts/api";
 
 type ItemTab = "reviews" | "children" | "links" | "details";
 
@@ -141,6 +143,25 @@ export default function ItemPage() {
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <SaveButton item={item} />
+            <DeleteContentButton
+              ownerId={itemPost?.author.id ?? item.uploadedBy}
+              label="Eliminar obra"
+              showText
+              confirmationMessage="¿Eliminar esta obra y sus publicaciones, reseñas, comentarios y archivos asociados? Esta acción no se puede deshacer."
+              onDelete={() => deletePost(item.postId)}
+              queryKeys={[
+                ["posts"],
+                ["featuredPosts"],
+                ["userPosts"],
+                ["post", item.postId],
+                ["itemPost"],
+                ["item"],
+                ["itemReviews"],
+                ["comments"],
+                ["itemChildren"],
+              ]}
+              onDeleted={() => navigate("/")}
+            />
             <span className="text-xs text-foreground/50">
               En {item.savesCount} {item.savesCount === 1 ? "lista" : "listas"}
             </span>
@@ -163,7 +184,7 @@ export default function ItemPage() {
       {!itemPostLoading && noItemPost && (
         <Link
           to="/create-post"
-          state={{ itemId: item.id, kind: "item" }}
+          state={{ itemId: item.id }}
           className="mb-4 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-white"
         >
           Crear publicación para esta obra
@@ -254,8 +275,8 @@ export default function ItemPage() {
 
       {tab === "details" && <ItemDetails item={item} />}
 
-      <CommentsPanel postId={commentsPostId} onClose={() => setCommentsPostId(null)} />
-      <SharePanel postId={sharePostId} onClose={() => setSharePostId(null)} />
+      <CommentsPanel key={commentsPostId ?? "closed"} postId={commentsPostId} onClose={() => setCommentsPostId(null)} />
+      <SharePanel key={sharePostId ?? "closed"} postId={sharePostId} onClose={() => setSharePostId(null)} />
     </div>
   );
 }

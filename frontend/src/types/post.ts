@@ -21,7 +21,7 @@ export type ModerationStatus = "approved" | "pending" | "rejected";
 export type PostKind = "item" | "review";
 
 export interface PostReview {
-  authorScore: number; // 1.0 a 10.0: la nota que el autor le pone al ítem
+  authorScore: number | null; // null cuando el autor no puntuó el ítem
 }
 
 export interface Post {

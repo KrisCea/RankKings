@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface RatingControlProps {
   currentUserRating?: number;
@@ -14,12 +14,13 @@ export default function RatingControl({
   const hasRated = currentUserRating !== undefined;
   const [localValue, setLocalValue] = useState(currentUserRating ?? 5.5);
   const [touched, setTouched] = useState(hasRated);
+  const [previousRating, setPreviousRating] = useState(currentUserRating);
 
-  // Si el post se actualiza desde afuera (ej: tras quitar el rating), sincroniza el control
-  useEffect(() => {
+  if (previousRating !== currentUserRating) {
+    setPreviousRating(currentUserRating);
     setLocalValue(currentUserRating ?? 5.5);
     setTouched(currentUserRating !== undefined);
-  }, [currentUserRating]);
+  }
 
   function handleReset() {
     if (!touched) return;

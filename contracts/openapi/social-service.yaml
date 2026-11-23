@@ -13,7 +13,122 @@ servers:
 tags:
   - name: Posts
   - name: Comments
+  - name: Moderation
 paths:
+  /admin/moderation:
+    get:
+      tags: [Moderation]
+      operationId: getModerationQueue
+      summary: Listar contenido para moderación
+      description: >-
+        Solo administradores. La cola excluye cargas de medios incompletas.
+        Ordena por submittedAt descendente y usa cursor opaco.
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ModerationStatus"
+          description: Estado a filtrar; por defecto pending.
+          default: pending
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, post, review, comment, media]
+          description: Tipo a filtrar; all mezcla todos los tipos.
+          default: all
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor opaco para la siguiente página.
+      responses:
+        "200":
+          description: Página de elementos de moderación.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationQueuePage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /admin/moderation/{type}/{id}/approve:
+    post:
+      tags: [Moderation]
+      operationId: approveModerationItem
+      summary: Aprobar un elemento pendiente
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ModerationType"
+        - $ref: "#/components/parameters/ModerationId"
+      responses:
+        "200":
+          description: Elemento aprobado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationDecision"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /admin/moderation/{type}/{id}/reject:
+    post:
+      tags: [Moderation]
+      operationId: rejectModerationItem
+      summary: Rechazar un elemento pendiente
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ModerationType"
+        - $ref: "#/components/parameters/ModerationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectModerationInput"
+      responses:
+        "200":
+          description: Elemento rechazado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationDecision"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/ServerError"
   /posts:
     get:
       tags: [Posts]
@@ -52,11 +167,14 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [itemId, kind, caption]
+              required: [kind, caption]
               properties:
                 itemId:
                   type: string
                   minLength: 1
+                  description: Obra existente a la que se asocia la publicación.
+                rankableItem:
+                  $ref: "#/components/schemas/NewRankableItemInput"
                 kind:
                   type: string
                   enum: [item]
@@ -64,6 +182,9 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 2000
+              oneOf:
+                - required: [itemId]
+                - required: [rankableItem]
       responses:
         "201":
           description: Publicación creada.
@@ -117,6 +238,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags: [Posts]
+      operationId: deletePost
+      summary: Eliminar una publicación propia o moderada
+      description: >-
+        Solo el autor o un administrador puede eliminar. Al eliminar una
+        publicación kind=item se eliminan también la obra, sus reseñas,
+        comentarios, archivos y publicaciones asociadas.
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "204":
+          description: Publicación y contenido asociado eliminados.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
         "500":
@@ -202,6 +347,28 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /posts/{postId}/reviews/{reviewId}:
+    delete:
+      tags: [Posts]
+      operationId: deleteReview
+      summary: Eliminar una reseña propia o moderada
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/ReviewId"
+      responses:
+        "204":
+          description: Reseña eliminada.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
         "500":
@@ -522,6 +689,39 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/ServerError"
+  /comments/{commentId}:
+    delete:
+      tags: [Comments]
+      operationId: deleteComment
+      summary: Marcar un comentario propio como eliminado
+      description: >-
+        Solo el autor o un administrador puede eliminar. Se conserva el
+        comentario como tombstone para mantener las respuestas del hilo.
+      security:
+        - SessionCookie: []
+        - BearerAuth: []
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Comentario marcado como eliminado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
 components:
   securitySchemes:
     SessionCookie:
@@ -555,6 +755,20 @@ components:
       schema:
         type: string
         minLength: 1
+    ModerationType:
+      name: type
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [post, review, comment, media]
+    ModerationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
     Username:
       name: username
       in: path
@@ -576,6 +790,18 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
+    Forbidden:
+      description: La sesión no tiene permiso para esta acción.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Conflict:
+      description: El elemento ya no está pendiente de moderación.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
     NotFound:
       description: Publicación, comentario, usuario u obra no encontrada.
       content:
@@ -589,6 +815,32 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
   schemas:
+    NewRankableItemInput:
+      type: object
+      additionalProperties: false
+      required: [category, title, creatorName, identifiers]
+      properties:
+        category:
+          $ref: "#/components/schemas/CategoryId"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        creatorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        year:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        identifiers:
+          type: object
+          additionalProperties:
+            type: string
     CategoryId:
       type: string
       enum: [music, podcasts, books, movies, concerts, videogames, art, boardgames]
@@ -598,6 +850,182 @@ components:
     ModerationStatus:
       type: string
       enum: [approved, pending, rejected]
+    ModerationQueuePage:
+      type: object
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModerationQueueItem"
+        page:
+          type: object
+          required: [limit, nextCursor, hasMore]
+          properties:
+            limit:
+              type: integer
+            nextCursor:
+              type: [string, "null"]
+            hasMore:
+              type: boolean
+    ModerationQueueItem:
+      oneOf:
+        - $ref: "#/components/schemas/ModerationPost"
+        - $ref: "#/components/schemas/ModerationReview"
+        - $ref: "#/components/schemas/ModerationComment"
+        - $ref: "#/components/schemas/ModerationMedia"
+      discriminator:
+        propertyName: type
+        mapping:
+          post: "#/components/schemas/ModerationPost"
+          review: "#/components/schemas/ModerationReview"
+          comment: "#/components/schemas/ModerationComment"
+          media: "#/components/schemas/ModerationMedia"
+    ModerationEntry:
+      type: object
+      required: [id, type, status, submittedAt, author, content]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [post, review, comment, media]
+        status:
+          $ref: "#/components/schemas/ModerationStatus"
+        submittedAt:
+          type: string
+          format: date-time
+        author:
+          type: object
+          required: [id, username]
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+    ModerationPost:
+      allOf:
+        - $ref: "#/components/schemas/ModerationEntry"
+        - type: object
+          properties:
+            type:
+              const: post
+            content:
+              type: object
+              required: [kind, caption, item]
+              properties:
+                kind:
+                  type: string
+                  enum: [item]
+                caption:
+                  type: string
+                item:
+                  type: object
+                  required: [id, title, category, coverUrl]
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    category:
+                      $ref: "#/components/schemas/CategoryId"
+                    coverUrl:
+                      type: [string, "null"]
+                      format: uri
+    ModerationReview:
+      allOf:
+        - $ref: "#/components/schemas/ModerationEntry"
+        - type: object
+          properties:
+            type:
+              const: review
+            content:
+              type: object
+              required: [postId, itemId, text, authorScore]
+              properties:
+                postId:
+                  type: string
+                itemId:
+                  type: string
+                text:
+                  type: string
+                authorScore:
+                  type: [number, "null"]
+                  minimum: 1
+                  maximum: 10
+    ModerationComment:
+      allOf:
+        - $ref: "#/components/schemas/ModerationEntry"
+        - type: object
+          properties:
+            type:
+              const: comment
+            content:
+              type: object
+              required: [postId, text]
+              properties:
+                postId:
+                  type: string
+                parentId:
+                  type: [string, "null"]
+                text:
+                  type: string
+    ModerationMedia:
+      allOf:
+        - $ref: "#/components/schemas/ModerationEntry"
+        - type: object
+          properties:
+            type:
+              const: media
+            content:
+              type: object
+              required: [postId, mediaType, url, isCover]
+              properties:
+                postId:
+                  type: string
+                mediaType:
+                  $ref: "#/components/schemas/MediaType"
+                url:
+                  type: string
+                  format: uri
+                contentType:
+                  type: [string, "null"]
+                isCover:
+                  type: boolean
+    ModerationDecision:
+      type: object
+      required: [id, type, status, moderatedAt, moderatedBy, reason]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [post, review, comment, media]
+        status:
+          type: string
+          enum: [approved, rejected]
+        moderatedAt:
+          type: string
+          format: date-time
+        moderatedBy:
+          type: object
+          required: [id, username]
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+        reason:
+          type: [string, "null"]
+    RejectModerationInput:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
     UserSummary:
       type: object
       additionalProperties: false
@@ -750,7 +1178,7 @@ components:
       required: [authorScore]
       properties:
         authorScore:
-          type: number
+          type: [number, "null"]
           minimum: 1
           maximum: 10
     Post:
@@ -834,7 +1262,7 @@ components:
     Review:
       type: object
       additionalProperties: false
-      required: [id, postId, kind, author, text, media, likesCount, likedByCurrentUser, createdAt]
+      required: [id, postId, kind, authorScore, author, text, media, likesCount, likedByCurrentUser, createdAt]
       properties:
         id:
           type: string
@@ -844,7 +1272,7 @@ components:
           type: string
           enum: [review]
         authorScore:
-          type: number
+          type: [number, "null"]
           minimum: 1
           maximum: 10
         author:
@@ -866,7 +1294,7 @@ components:
     NewReviewInput:
       type: object
       additionalProperties: false
-      required: [text, authorScore]
+      required: [text]
       properties:
         text:
           type: string
@@ -913,6 +1341,9 @@ components:
           $ref: "#/components/schemas/CommentAuthor"
         text:
           type: string
+        isDeleted:
+          type: boolean
+          description: Si es true, la UI oculta el contenido original y muestra un tombstone.
         likesCount:
           type: integer
           minimum: 0

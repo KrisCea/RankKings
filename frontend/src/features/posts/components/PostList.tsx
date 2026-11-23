@@ -61,8 +61,8 @@ export default function PostList({ posts, isLoading, emptyMessage }: PostListPro
         ))}
       </div>
 
-      <CommentsPanel postId={commentsPostId} onClose={() => setCommentsPostId(null)} />
-      <SharePanel postId={sharePostId} onClose={() => setSharePostId(null)} />
+      <CommentsPanel key={commentsPostId ?? "closed"} postId={commentsPostId} onClose={() => setCommentsPostId(null)} />
+      <SharePanel key={sharePostId ?? "closed"} postId={sharePostId} onClose={() => setSharePostId(null)} />
     </>
   );
 }

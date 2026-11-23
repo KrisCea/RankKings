@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addReview,
@@ -27,7 +27,7 @@ export default function CreateReviewForm({
   onCreated,
 }: CreateReviewFormProps) {
   const [text, setText] = useState("");
-  const [score, setScore] = useState(8);
+  const [score, setScore] = useState<number | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [externalUrl, setExternalUrl] = useState("");
   const [externalType, setExternalType] = useState<"video" | "external">("video");
@@ -36,12 +36,20 @@ export default function CreateReviewForm({
   const [externalAdded, setExternalAdded] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const filePreviews = useMemo(
+    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
+    [files]
+  );
+
+  useEffect(() => () => {
+    filePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
+  }, [filePreviews]);
 
   const create = useMutation({
     mutationFn: async () => {
       const review = createdReview ?? await addReview(postId, {
         text: text.trim(),
-        authorScore: score,
+        ...(score !== null ? { authorScore: score } : {}),
       });
       if (!createdReview) setCreatedReview(review);
 
@@ -78,10 +86,6 @@ export default function CreateReviewForm({
     }
     if (!text.trim()) {
       setValidationError("Escribe el contenido de la reseña.");
-      return;
-    }
-    if (!Number.isFinite(score) || score < 1 || score > 10) {
-      setValidationError("La puntuación debe estar entre 1 y 10.");
       return;
     }
     if (files.length + (externalUrl.trim() ? 1 : 0) > MAX_FILES) {
@@ -138,13 +142,12 @@ export default function CreateReviewForm({
           <label className="flex flex-col gap-1">
             Puntuación (1–10)
             <input
-              required
               type="number"
-              min="1"
-              max="10"
-              step="0.5"
-              value={score}
-              onChange={(event) => setScore(Number(event.target.value))}
+              value={score ?? ""}
+              onChange={(event) => {
+                const value = event.target.value;
+                setScore(value === "" ? null : Number(value));
+              }}
               className="rounded border border-foreground/20 bg-background p-2"
             />
           </label>
@@ -157,6 +160,18 @@ export default function CreateReviewForm({
               onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
               className="rounded border border-foreground/20 bg-background p-2 text-sm"
             />
+            {filePreviews.length > 0 && (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {filePreviews.map(({ file, url }) => (
+                  <img
+                    key={`${file.name}-${file.size}-${file.lastModified}`}
+                    src={url}
+                    alt={`Vista previa de ${file.name}`}
+                    className="aspect-square w-full rounded-lg object-cover"
+                  />
+                ))}
+              </div>
+            )}
           </label>
           <div className="flex flex-col gap-2">
             <label htmlFor="review-external-media-url">Video o enlace externo (HTTPS, opcional)</label>

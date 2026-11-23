@@ -4,7 +4,7 @@ export interface Comment {
   id: string;
   postId: string;
   kind?: "comment" | "review";
-  authorScore?: number;
+  authorScore?: number | null;
   parentId?: string;          // si es una respuesta, id del comentario principal del hilo
   replyToUsername?: string;   // a quién responde (para mostrar la mención @usuario)
   author: {
@@ -13,6 +13,7 @@ export interface Comment {
     avatarUrl: string;
   };
   text: string;
+  isDeleted?: boolean;
   likesCount: number;
   likedByCurrentUser: boolean;
   createdAt: string;

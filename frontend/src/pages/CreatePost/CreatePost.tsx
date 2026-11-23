@@ -1,21 +1,15 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 import { CATEGORY_LIST, CATEGORY_REQUIREMENTS } from "../../categories/registry";
 import type { CategoryId } from "../../categories/types";
 import {
-  createRankableItem,
-  type NewRankableItemInput,
-} from "../../features/items/api";
-import {
   addExternalMedia,
-  addReview,
   createPost,
-  getItemPost,
   uploadPostImage,
+  type NewRankableItemInput,
 } from "../../features/posts/api";
-import type { PostKind } from "../../types/post";
 import { getErrorMessage } from "../../lib/errors";
 
 const MAX_FILES = 4;
@@ -25,17 +19,12 @@ const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 interface CreatePostLocationState {
   itemId?: string;
-  kind?: PostKind;
 }
-
-type ItemMode = "new" | "existing";
 
 export default function CreatePost() {
   const location = useLocation();
   const initialState = location.state as CreatePostLocationState | null;
-  const [itemId, setItemId] = useState(initialState?.itemId ?? "");
-  const [kind, setKind] = useState<PostKind>(initialState?.kind ?? "item");
-  const [itemMode, setItemMode] = useState<ItemMode>(initialState?.itemId ? "existing" : "new");
+  const [itemId] = useState(initialState?.itemId ?? "");
   const [category, setCategory] = useState<CategoryId>("music");
   const [title, setTitle] = useState("");
   const [creatorName, setCreatorName] = useState("");
@@ -43,9 +32,7 @@ export default function CreatePost() {
   const [year, setYear] = useState("");
   const [identifiers, setIdentifiers] = useState<Record<string, string>>({});
   const [cover, setCover] = useState<File | null>(null);
-  const [createdItemId, setCreatedItemId] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
-  const [score, setScore] = useState(8);
   const [files, setFiles] = useState<File[]>([]);
   const [externalUrl, setExternalUrl] = useState("");
   const [externalType, setExternalType] = useState<"video" | "external">("video");
@@ -56,6 +43,19 @@ export default function CreatePost() {
   const { data: user, isLoading } = useCurrentUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const coverPreview = useMemo(() => cover ? URL.createObjectURL(cover) : null, [cover]);
+  const filePreviews = useMemo(
+    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
+    [files]
+  );
+
+  useEffect(() => () => {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+  }, [coverPreview]);
+
+  useEffect(() => () => {
+    filePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
+  }, [filePreviews]);
 
   const create = useMutation({
     mutationFn: async (input: {
@@ -63,14 +63,17 @@ export default function CreatePost() {
       newItem?: NewRankableItemInput;
       caption: string;
     }) => {
-      let postItemId = input.itemId ?? createdItemId ?? undefined;
-      if (input.newItem && !createdItemId) {
-        const createdItem = await createRankableItem(input.newItem);
-        postItemId = createdItem.id;
-        setCreatedItemId(createdItem.id);
+      if (input.itemId) {
+        return createPost({ itemId: input.itemId, kind: "item", caption: input.caption });
       }
-      if (!postItemId) throw new Error("Indica la obra a la que quieres asociar la publicación.");
-      return createPost({ itemId: postItemId, kind: "item", caption: input.caption });
+      if (input.newItem) {
+        return createPost({
+          rankableItem: input.newItem,
+          kind: "item",
+          caption: input.caption,
+        });
+      }
+      throw new Error("Indica la obra a la que quieres asociar la publicación.");
     },
     onSuccess: async (post) => {
       await Promise.all([
@@ -78,28 +81,11 @@ export default function CreatePost() {
         queryClient.invalidateQueries({ queryKey: ["featuredPosts"] }),
         queryClient.invalidateQueries({ queryKey: ["itemPost", post.rankableItem.id] }),
       ]);
-      if (files.length > 0 || externalUrl.trim()) {
+      if (cover || files.length > 0 || externalUrl.trim()) {
         setCreatedPost(post);
         return;
       }
       navigate(`/item/${post.rankableItem.id}`);
-    },
-  });
-
-  const review = useMutation({
-    mutationFn: async (input: { itemId: string; text: string; authorScore: number }) => {
-      const itemPost = await getItemPost(input.itemId);
-      await addReview(itemPost.id, { text: input.text, authorScore: input.authorScore });
-      return input.itemId;
-    },
-    onSuccess: async (reviewedItemId) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["itemReviews", reviewedItemId] }),
-        queryClient.invalidateQueries({ queryKey: ["userPosts"] }),
-        queryClient.invalidateQueries({ queryKey: ["item", reviewedItemId] }),
-        queryClient.invalidateQueries({ queryKey: ["itemPost", reviewedItemId] }),
-      ]);
-      navigate(`/item/${reviewedItemId}`);
     },
   });
 
@@ -132,7 +118,7 @@ export default function CreatePost() {
   });
 
   function validateMedia(): string | null {
-    if (itemMode === "new") {
+    if (!itemId) {
       if (!cover) return "Selecciona una portada para la obra.";
       if (!IMAGE_TYPES.has(cover.type)) return "La portada debe ser JPEG, PNG o WebP.";
       if (cover.size > MAX_FILE_SIZE) return "La portada debe pesar 10 MiB o menos.";
@@ -193,23 +179,14 @@ export default function CreatePost() {
       return;
     }
 
-    if (kind === "review") {
-      if (!itemId.trim()) {
-        setValidationError("Indica el ID de la obra que quieres reseñar.");
-        return;
-      }
-      review.mutate({ itemId: itemId.trim(), text: caption.trim(), authorScore: score });
-      return;
-    }
-
     const error = validateMedia();
     if (error) {
       setValidationError(error);
       return;
     }
-    if (itemMode === "existing") {
+    if (itemId) {
       if (!itemId.trim()) {
-        setValidationError("Indica el ID de la obra existente.");
+        setValidationError("No se indicó la obra de esta publicación.");
         return;
       }
       create.mutate({ itemId: itemId.trim(), caption: caption.trim() });
@@ -219,6 +196,9 @@ export default function CreatePost() {
       setValidationError("Selecciona una portada para la obra.");
       return;
     }
+    setFiles((previous) =>
+      previous.some((file) => file === cover) ? previous : [cover, ...previous]
+    );
     const categoryIdentifiers = Object.fromEntries(
       Object.entries(identifiers)
         .map(([key, value]) => [key, value.trim()] as const)
@@ -232,7 +212,6 @@ export default function CreatePost() {
         description: description.trim() || undefined,
         year: year ? Number(year) : undefined,
         identifiers: categoryIdentifiers,
-        cover,
       },
       caption: caption.trim(),
     });
@@ -250,8 +229,8 @@ export default function CreatePost() {
     );
   }
 
-  const isPending = create.isPending || review.isPending || upload.isPending;
-  const requestError = createdPost ? upload.error : kind === "review" ? review.error : create.error;
+  const isPending = create.isPending || upload.isPending;
+  const requestError = createdPost ? upload.error : create.error;
 
   return (
     <main className="mx-auto max-w-xl p-6">
@@ -282,65 +261,25 @@ export default function CreatePost() {
             </>
           ) : (
             <>
-              <label className="flex flex-col gap-1">
-                Tipo de publicación
-                <select
-                  value={kind}
-                  onChange={(e) => {
-                    const selectedKind = e.target.value as PostKind;
-                    setKind(selectedKind);
-                    if (selectedKind === "review") setItemMode("existing");
-                  }}
-                  className="rounded border border-foreground/20 bg-background p-2"
-                >
-                  <option value="item">Publicación de obra</option>
-                  <option value="review">Reseña</option>
-                </select>
-              </label>
-              {(kind === "review" || itemMode === "existing") && (
-                <label className="flex flex-col gap-1">
-                  ID de obra existente
-                  <input
-                    required
-                    maxLength={100}
-                    value={itemId}
-                    onChange={(e) => setItemId(e.target.value)}
-                    className="rounded border border-foreground/20 bg-background p-2"
-                  />
-                </label>
-              )}
-              {kind === "item" && (
+              {!itemId && (
                 <>
                   <label className="flex flex-col gap-1">
-                    Obra
+                    Tipo de obra
                     <select
-                      value={itemMode}
-                      onChange={(e) => setItemMode(e.target.value as ItemMode)}
+                      value={category}
+                      onChange={(e) => {
+                        setCategory(e.target.value as CategoryId);
+                        setIdentifiers({});
+                      }}
                       className="rounded border border-foreground/20 bg-background p-2"
                     >
-                      <option value="new">Crear obra nueva (ID automático)</option>
-                      <option value="existing">Publicar sobre una obra existente</option>
+                      {CATEGORY_LIST.map((itemCategory) => (
+                        <option key={itemCategory.id} value={itemCategory.id}>
+                          {itemCategory.label}
+                        </option>
+                      ))}
                     </select>
                   </label>
-                  {itemMode === "new" && (
-                    <>
-                      <label className="flex flex-col gap-1">
-                        Tipo de obra
-                        <select
-                          value={category}
-                          onChange={(e) => {
-                            setCategory(e.target.value as CategoryId);
-                            setIdentifiers({});
-                          }}
-                          className="rounded border border-foreground/20 bg-background p-2"
-                        >
-                          {CATEGORY_LIST.map((itemCategory) => (
-                            <option key={itemCategory.id} value={itemCategory.id}>
-                              {itemCategory.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
                       <label className="flex flex-col gap-1">
                         Título
                         <input
@@ -391,6 +330,13 @@ export default function CreatePost() {
                           onChange={(e) => setCover(e.target.files?.[0] ?? null)}
                           className="rounded border border-foreground/20 bg-background p-2 text-sm"
                         />
+                        {coverPreview && (
+                          <img
+                            src={coverPreview}
+                            alt="Vista previa de la portada"
+                            className="mt-2 aspect-4/3 w-full rounded-lg object-cover"
+                          />
+                        )}
                       </label>
                       {CATEGORY_REQUIREMENTS[category].map((identifier) => (
                         <label key={identifier.key} className="flex flex-col gap-1">
@@ -410,25 +356,9 @@ export default function CreatePost() {
                           <span className="text-xs text-foreground/60">{identifier.description}</span>
                         </label>
                       ))}
-                    </>
-                  )}
                 </>
               )}
-              {kind === "review" && (
-                <label className="flex flex-col gap-1">
-                  Nota (1–10)
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    value={score}
-                    onChange={(e) => setScore(Number(e.target.value))}
-                    className="rounded border border-foreground/20 bg-background p-2"
-                  />
-                </label>
-              )}
-              {kind === "item" && itemMode === "new" && (
+              {!itemId && (
                 <label className="flex flex-col gap-1">
                   Descripción de la publicación
                   <textarea
@@ -441,7 +371,7 @@ export default function CreatePost() {
                   />
                 </label>
               )}
-              {(kind === "review" || itemMode === "existing") && (
+              {itemId && (
                 <label className="flex flex-col gap-1">
                   Descripción
                   <textarea
@@ -454,51 +384,54 @@ export default function CreatePost() {
                   />
                 </label>
               )}
-              {kind === "item" && (
-                <>
-                  <label className="flex flex-col gap-1">
-                    Imágenes (JPEG, PNG o WebP; hasta 4 y 10 MiB cada una)
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-                      className="rounded border border-foreground/20 bg-background p-2 text-sm"
-                    />
-                  </label>
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="external-media-url">Video o enlace externo (HTTPS, opcional)</label>
-                    <input
-                      id="external-media-url"
-                      type="url"
-                      value={externalUrl}
-                      onChange={(e) => setExternalUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="rounded border border-foreground/20 bg-background p-2"
-                    />
-                    <select
-                      aria-label="Tipo de enlace"
-                      value={externalType}
-                      onChange={(e) => setExternalType(e.target.value as "video" | "external")}
-                      className="rounded border border-foreground/20 bg-background p-2"
-                    >
-                      <option value="video">Video</option>
-                      <option value="external">Enlace externo</option>
-                    </select>
+              <label className="flex flex-col gap-1">
+                Imágenes (JPEG, PNG o WebP; hasta 4 y 10 MiB cada una)
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                  className="rounded border border-foreground/20 bg-background p-2 text-sm"
+                />
+                {filePreviews.length > 0 && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {filePreviews.map(({ file, url }) => (
+                      <img
+                        key={`${file.name}-${file.size}-${file.lastModified}`}
+                        src={url}
+                        alt={`Vista previa de ${file.name}`}
+                        className="aspect-square w-full rounded-lg object-cover"
+                      />
+                    ))}
                   </div>
-                </>
-              )}
+                )}
+              </label>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="external-media-url">Video o enlace externo (HTTPS, opcional)</label>
+                <input
+                  id="external-media-url"
+                  type="url"
+                  value={externalUrl}
+                  onChange={(e) => setExternalUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="rounded border border-foreground/20 bg-background p-2"
+                />
+                <select
+                  aria-label="Tipo de enlace"
+                  value={externalType}
+                  onChange={(e) => setExternalType(e.target.value as "video" | "external")}
+                  className="rounded border border-foreground/20 bg-background p-2"
+                >
+                  <option value="video">Video</option>
+                  <option value="external">Enlace externo</option>
+                </select>
+              </div>
             </>
           )}
         </fieldset>
 
         {validationError && <p role="alert" className="text-red-500">{validationError}</p>}
         {requestError && <p role="alert" className="text-red-500">{getErrorMessage(requestError)}</p>}
-        {create.error && createdItemId && (
-          <p role="status" className="text-sm text-foreground/70">
-            La obra ya se creó con ID <code>{createdItemId}</code>. Puedes volver a intentar publicar.
-          </p>
-        )}
         <button
           disabled={isPending}
           type="submit"
@@ -508,11 +441,9 @@ export default function CreatePost() {
             ? "Procesando…"
             : createdPost
               ? "Subir contenido y publicar"
-              : kind === "review"
-                ? "Publicar reseña"
-                : itemMode === "new"
-                  ? "Crear obra y publicar"
-                  : "Crear publicación"}
+              : itemId
+                ? "Crear publicación"
+                : "Crear obra y publicar"}
         </button>
         {createdPost && (
           <Link className="text-center text-sm text-foreground/60 hover:text-primary" to={`/item/${createdPost.rankableItem.id}`}>

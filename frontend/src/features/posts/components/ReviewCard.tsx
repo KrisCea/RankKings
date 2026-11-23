@@ -1,10 +1,12 @@
 import { Heart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Avatar from "../../../components/ui/Avatar";
+import DeleteContentButton from "../../../components/ui/DeleteContentButton";
 import UserHoverCard from "../../users/components/UserHoverCard";
 import type { RankableItem } from "../../../types/rankableItem";
 import type { Review } from "../../../types/comment";
 import PostMediaFrame from "./PostMediaFrame";
+import { deleteReview } from "../api";
 
 interface ReviewCardProps {
   review: Review;
@@ -33,6 +35,21 @@ export default function ReviewCard({ review, item, onToggleLike }: ReviewCardPro
             {review.authorScore.toFixed(1)}
           </span>
         )}
+        <DeleteContentButton
+          ownerId={review.author.id}
+          label="Eliminar reseña"
+          confirmationMessage="¿Eliminar esta reseña?"
+          onDelete={() => deleteReview(review.postId, review.id)}
+          queryKeys={[
+            ["posts"],
+            ["featuredPosts"],
+            ["userPosts"],
+            ["itemReviews"],
+            ["itemPost"],
+            ["post", review.postId],
+            ["comments", review.postId],
+          ]}
+        />
       </div>
 
       {item ? (

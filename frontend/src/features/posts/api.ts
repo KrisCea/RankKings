@@ -1,6 +1,7 @@
 import { api } from "../../lib/axios";
 import type { Review } from "../../types/comment";
 import type { Post } from "../../types/post";
+import type { CategoryId } from "../../categories/types";
 
 export async function getPosts(): Promise<Post[]> {
   const { data } = await api.get<Post[]>("/posts");
@@ -15,6 +16,10 @@ export async function getFeaturedPosts(): Promise<Post[]> {
 export async function getPostById(postId: string): Promise<Post> {
   const { data } = await api.get<Post>(`/posts/${postId}`);
   return data;
+}
+
+export async function deletePost(postId: string): Promise<void> {
+  await api.delete(`/posts/${encodeURIComponent(postId)}`);
 }
 
 export async function getReviewsForItem(itemId: string): Promise<Review[]> {
@@ -67,6 +72,12 @@ export async function addReview(
 ): Promise<Review> {
   const { data } = await api.post<Review>(`/posts/${encodeURIComponent(postId)}/reviews`, input);
   return data;
+}
+
+export async function deleteReview(postId: string, reviewId: string): Promise<void> {
+  await api.delete(
+    `/posts/${encodeURIComponent(postId)}/reviews/${encodeURIComponent(reviewId)}`
+  );
 }
 
 export async function uploadReviewImage(
@@ -125,11 +136,26 @@ export async function addExternalMedia(
   await api.post(`/posts/${encodeURIComponent(postId)}/media/external`, input);
 }
 
-export interface NewPostInput {
-  itemId: string;
-  kind: "item";
-  caption: string;
+export interface NewRankableItemInput {
+  category: CategoryId;
+  title: string;
+  creatorName: string;
+  description?: string;
+  year?: number;
+  identifiers: Record<string, string>;
 }
+
+export type NewPostInput =
+  | {
+      itemId: string;
+      kind: "item";
+      caption: string;
+    }
+  | {
+      rankableItem: NewRankableItemInput;
+      kind: "item";
+      caption: string;
+    };
 
 export async function createPost(input: NewPostInput): Promise<Post> {
   const { data } = await api.post<Post>("/posts", input);

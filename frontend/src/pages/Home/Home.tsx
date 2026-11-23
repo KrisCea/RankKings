@@ -112,11 +112,13 @@ export default function Home() {
       </Modal>
 
       <CommentsPanel
+        key={activeCommentsPostId ?? "closed"}
         postId={activeCommentsPostId}
         onClose={() => setActiveCommentsPostId(null)}
       />
 
       <SharePanel
+        key={activeSharePostId ?? "closed"}
         postId={activeSharePostId}
         onClose={() => setActiveSharePostId(null)}
       />

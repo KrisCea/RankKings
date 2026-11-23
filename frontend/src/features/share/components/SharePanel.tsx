@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Link2, Search } from "lucide-react";
 import Modal from "../../../components/ui/Modal";
 import UserListItem from "../../users/components/UserListItem";
@@ -18,13 +18,6 @@ export default function SharePanel({ postId, onClose }: SharePanelProps) {
   const { data: contacts, isLoading } = useShareContacts();
   const sharePost = useSharePost();
 
-  // Cada vez que se abre para un post, empieza limpio
-  useEffect(() => {
-    setQuery("");
-    setSent(new Set());
-    setCopied(false);
-  }, [postId]);
-
   const normalized = query.trim().toLowerCase();
   const filtered = (contacts ?? []).filter(
     (c) =>
@@ -43,7 +36,6 @@ export default function SharePanel({ postId, onClose }: SharePanelProps) {
   async function handleCopyLink() {
     if (!postId) return;
     try {
-      // TODO: la ruta /post/:id todavía no existe, se crea con la página de detalle
       await navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

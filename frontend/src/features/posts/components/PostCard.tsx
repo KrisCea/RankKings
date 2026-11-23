@@ -6,9 +6,11 @@ import PostMediaFrame from "./PostMediaFrame";
 import VerificationBadge from "./VerificationBadge";
 import RankableItemSummary from "./RankableItemSummary";
 import Avatar from "../../../components/ui/Avatar";
+import DeleteContentButton from "../../../components/ui/DeleteContentButton";
 import UserHoverCard from "../../users/components/UserHoverCard";
 import type { Post } from "../../../types/post";
 import SaveButton from "../../items/components/SaveButton";
+import { deletePost } from "../api";
 
 interface PostCardProps {
   post: Post;
@@ -20,6 +22,7 @@ interface PostCardProps {
   onUnrate: (postId: string) => void;
   onOpenComments: (postId: string) => void;
   onOpenShare: (postId: string) => void;
+  onDeleted?: () => void;
 }
 
 function PostLink({
@@ -51,6 +54,7 @@ export default function PostCard({
   onUnrate,
   onOpenComments,
   onOpenShare,
+  onDeleted,
 }: PostCardProps) {
   const isPreview = variant === "preview";
   const isReview = post.kind === "review";
@@ -92,6 +96,28 @@ export default function PostCard({
         ) : (
           <SaveButton item={post.rankableItem} variant="icon" className="ml-auto" />
         )}
+        <DeleteContentButton
+          ownerId={post.author.id}
+          label={isReview ? "Eliminar publicación" : "Eliminar obra"}
+          confirmationMessage={
+            isReview
+              ? "¿Eliminar esta publicación?"
+              : "¿Eliminar esta obra y sus publicaciones, reseñas, comentarios y archivos asociados? Esta acción no se puede deshacer."
+          }
+          onDelete={() => deletePost(post.id)}
+          queryKeys={[
+            ["posts"],
+            ["featuredPosts"],
+            ["userPosts"],
+            ["post", post.id],
+            ["itemPost"],
+            ["item"],
+            ["itemReviews"],
+            ["comments"],
+            ["itemChildren"],
+          ]}
+          onDeleted={onDeleted}
+        />
       </div>
 
       {/* Contenido */}
@@ -104,7 +130,7 @@ export default function PostCard({
             enabled={isPreview}
             className={`block ${showItem ? "mt-3" : ""}`}
           >
-            {post.review && (
+            {post.review && typeof post.review.authorScore === "number" && (
               <div className="mb-2 flex items-center gap-1.5 text-sm">
                 <Star size={16} className="text-primary" fill="currentColor" />
                 <span className="font-semibold text-foreground">

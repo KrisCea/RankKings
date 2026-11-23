@@ -23,8 +23,20 @@ export class AppError extends Error {
 // BACKEND: formato de error esperado en las respuestas 4xx: { "code": "...", "message": "texto para el usuario" }
 export function getErrorMessage(error: unknown, fallback = DEFAULT_MESSAGE): string {
   if (isAxiosError(error)) {
-    const message = (error.response?.data as { message?: unknown } | undefined)?.message;
-    return typeof message === "string" ? message : fallback;
+    const responseData = error.response?.data as
+      | { message?: unknown; error?: unknown }
+      | undefined;
+    const message = typeof responseData?.message === "string"
+      ? responseData.message
+      : typeof responseData?.error === "string"
+        ? responseData.error
+        : undefined;
+    if (message) return message;
+    if (error.response?.status === 405) return "El servidor no tiene habilitada la ruta para publicar esta obra.";
+    if (error.response?.status === 401) return "Tu sesión no es válida o ha expirado.";
+    if (error.response?.status === 413) return "El archivo supera el tamaño permitido.";
+    if (error.code === "ERR_NETWORK") return "No se pudo conectar con el servidor.";
+    return fallback;
   }
   if (error instanceof Error && error.message) return error.message;
   return fallback;
