@@ -1,0 +1,85 @@
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: #FBFBFE;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1625;
+  --color-primary: #6B46C1;
+  --color-accent: #D69E2E;
+}
+
+.dark {
+  --color-background: #13111C;
+  --color-surface: #1E1B2E;
+  --color-foreground: #E2E8F0;
+  --color-primary: #9F7AEA;
+  --color-accent: #ECC94B;
+}
+
+/* ----------------------------------- */
+/* TEMAS POR CATEGORÍA (escalabilidad) */
+/* ----------------------------------- */
+
+[data-theme="movies"] {
+  --color-background: #FBFBFE;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1625;
+  --color-primary: #6B46C1;
+  --color-accent: #D69E2E;
+}
+
+.dark [data-theme="movies"] {
+  --color-background: #13111C;
+  --color-surface: #1E1B2E;
+  --color-foreground: #E2E8F0;
+  --color-primary: #9F7AEA;
+  --color-accent: #ECC94B;
+}
+
+[data-theme="music"] {
+  --color-background: #FBFBFE;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1625;
+  --color-primary: #6B46C1;
+  --color-accent: #D69E2E;
+}
+
+.dark [data-theme="music"] {
+  --color-background: #13111C;
+  --color-surface: #1E1B2E;
+  --color-foreground: #E2E8F0;
+  --color-primary: #9F7AEA;
+  --color-accent: #ECC94B;
+}
+
+[data-theme="art"] {
+  --color-background: #FBFBFE;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1625;
+  --color-primary: #6B46C1;
+  --color-accent: #D69E2E;
+}
+
+.dark [data-theme="art"] {
+  --color-background: #13111C;
+  --color-surface: #1E1B2E;
+  --color-foreground: #E2E8F0;
+  --color-primary: #9F7AEA;
+  --color-accent: #ECC94B;
+}
+
+[data-theme="books"] {
+  --color-background: #FBFBFE;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1A1625;
+  --color-primary: #6B46C1;
+  --color-accent: #D69E2E;
+}
+
+.dark [data-theme="books"] {
+  --color-background: #13111C;
+  --color-surface: #1E1B2E;
+  --color-foreground: #E2E8F0;
+  --color-primary: #9F7AEA;
+  --color-accent: #ECC94B;
+}

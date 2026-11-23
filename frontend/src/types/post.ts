@@ -1,0 +1,51 @@
+import type { CategoryId } from "../categories/types";
+import type { UserSummary } from "./user";
+import type { RankableItem } from "./rankableItem";
+
+export type MediaType = "image" | "video" | "external";
+
+export interface PostMedia {
+  id: string;
+  url: string;
+  type: MediaType;
+  thumbnailUrl?: string;
+  // BACKEND: dimensiones originales, las calcula el servidor al subir el archivo.
+  // Permiten reservar el tamaño correcto antes de que cargue la imagen (sin saltos de layout).
+  width?: number;
+  height?: number;
+}
+
+export type ModerationStatus = "approved" | "pending" | "rejected";
+
+// "item": publicación nueva de un RankableItem. "review": reseña de un usuario sobre un ítem existente.
+export type PostKind = "item" | "review";
+
+export interface PostReview {
+  authorScore: number | null; // null cuando el autor no puntuó el ítem
+}
+
+export interface Post {
+  id: string;
+  kind: PostKind;
+  category: CategoryId;
+  author: UserSummary;
+  caption: string; // descripción de la publicación, o el texto de la reseña
+  media: PostMedia[];
+  rankableItem: RankableItem;
+  review?: PostReview; // solo cuando kind === "review"
+
+  votesCount: number;
+  votedByCurrentUser: boolean;
+
+  // Lo que puntúa el slider: en "item" es la nota del ítem, en "review" es la utilidad de la reseña.
+  averageRating: number;
+  ratingsCount: number;
+  currentUserRating?: number;
+
+  commentsCount: number;
+  sharesCount: number;
+
+  moderationStatus: ModerationStatus;
+  createdAt: string;
+  isReelEligible: boolean;
+}
