@@ -35,24 +35,46 @@ frontend/src/
 ### Requisitos
 
 - Node.js compatible con la versión de Vite del proyecto y npm.
-- API Gateway y servicios backend disponibles para probar funciones que requieren datos o sesión.
+- JDK 25 para ejecutar el backend local.
 
-### Preparar el frontend
+### Iniciar el backend
+
+El backend vive en el repositorio separado `rankkings-backend`. En el layout de desarrollo habitual, ambos checkouts están bajo la misma carpeta:
+
+```text
+RankKings FullStack\
+├── rankkings-backend\
+└── RANKKINGS\
+    └── frontend\
+```
+
+Desde `RANKKINGS\frontend`, inicia sus cuatro servicios con el script del backend:
+
+```powershell
+Set-Location ..\..\rankkings-backend
+.\scripts\start-local.ps1
+```
+
+Se abrirá una ventana de PowerShell por servicio. Déjalas abiertas mientras desarrollas. El Gateway (`8080`) es la URL que debe usar el frontend; Identity (`8081`), Catalog (`8082`) y Social (`8083`) son servicios internos. El script configura el perfil `local` y activa opciones de desarrollo para CAPTCHA y verificación de correo; no las uses en producción.
+
+Si tus checkouts están en otras carpetas, ejecuta el mismo script desde la raíz de `rankkings-backend`. Consulta la [guía del backend](../../rankkings-backend/docs/DEVELOPER_GUIDE.md) para perfiles, pruebas, configuración y arquitectura.
+
+### Preparar y ejecutar el frontend
 
 Desde la raíz del repositorio, instala las dependencias:
 
 ```bash
 cd frontend
-npm install
+npm ci
 ```
 
-Crea el archivo local de variables de entorno a partir del ejemplo (en PowerShell):
+Si aún no existe `.env`, créalo desde el ejemplo (PowerShell):
 
 ```powershell
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Revisa `VITE_API_URL` en `frontend/.env`; por defecto apunta a `http://localhost:8080/api`. Debe ser la URL pública del API Gateway, no la de un microservicio. Si el gateway usa otra dirección, actualízala antes de iniciar la app.
+Configura `VITE_API_URL` en `frontend/.env` para que apunte al Gateway, no a un microservicio. Se recomienda `http://localhost:8080/api/v1`; el Gateway también conserva `/api` por compatibilidad. Si se usa otra dirección del Gateway, actualízala antes de iniciar.
 
 ### Ejecutar el frontend
 
@@ -80,7 +102,7 @@ En modo local, por defecto Identity imprime el enlace de verificación en su con
 
 ### Probar la aplicación
 
-1. Inicia el API Gateway y los servicios backend siguiendo la [guía de implementación del backend](../docs/GUIA_IMPLEMENTACION_BACKEND.md).
+1. Inicia el API Gateway y los servicios backend según los pasos anteriores.
 2. Ejecuta el frontend y abre `http://localhost:5173`.
 3. Prueba la navegación pública: feed, una ficha de obra, una publicación y un perfil.
 4. Registra una cuenta o inicia sesión para probar las funciones que requieren autenticación.

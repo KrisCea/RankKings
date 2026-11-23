@@ -9,3 +9,26 @@ export const api = axios.create({
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
+
+function csrfToken(): string | null {
+  const match = document.cookie
+    .split(";")
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith("XSRF-TOKEN="));
+  return match ? decodeURIComponent(match.slice("XSRF-TOKEN=".length)) : null;
+}
+
+api.interceptors.request.use(async (config) => {
+  const method = (config.method ?? "get").toLowerCase();
+  if (["post", "put", "patch", "delete"].includes(method)) {
+    let token = csrfToken();
+    if (!token) {
+      await api.get("/csrf");
+      token = csrfToken();
+    }
+    if (token) {
+      config.headers["X-XSRF-TOKEN"] = token;
+    }
+  }
+  return config;
+});
