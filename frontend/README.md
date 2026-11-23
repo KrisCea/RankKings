@@ -52,7 +52,7 @@ Crea el archivo local de variables de entorno a partir del ejemplo (en PowerShel
 Copy-Item .env.example .env
 ```
 
-Revisa `VITE_API_URL` en `frontend/.env`; por defecto apunta a `http://localhost:8080/api`. Debe ser la URL pública del API Gateway, no la de un microservicio. Si el gateway usa otra dirección, actualízala antes de iniciar la app.
+Revisa `VITE_API_URL` en `frontend/.env`; por defecto apunta a `http://localhost:8080/api/v1`. Debe ser la URL pública del API Gateway, no la de un microservicio. Si el gateway usa otra dirección, actualízala antes de iniciar la app.
 
 ### Ejecutar el frontend
 
