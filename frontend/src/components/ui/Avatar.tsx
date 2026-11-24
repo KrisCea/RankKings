@@ -14,7 +14,7 @@ export default function Avatar({ src, alt, size = 36, className = "" }: AvatarPr
         style={{ width: dimension, height: dimension }}
         className={`rounded-full bg-surface flex items-center justify-center text-xs text-foreground/50 ${className}`}
       >
-        {alt.charAt(0).toUpperCase()}
+        {(alt?.charAt(0) ?? "?").toUpperCase()}
       </div>
     );
   }
