@@ -21,6 +21,8 @@ const PAGE_SIZE = 25;
 
 function contentDescription(item: ModerationQueueItem) {
   switch (item.type) {
+    case "item":
+      return item.content.description || `Categoría: ${item.content.category}`;
     case "post":
       return item.content.caption;
     case "review":
@@ -33,6 +35,8 @@ function contentDescription(item: ModerationQueueItem) {
 
 function contextLink(item: ModerationQueueItem): string | null {
   switch (item.type) {
+    case "item":
+      return `/item/${item.id}`;
     case "post":
       return `/item/${item.content.item.id}`;
     case "review":
@@ -45,6 +49,8 @@ function contextLink(item: ModerationQueueItem): string | null {
 
 function titleFor(item: ModerationQueueItem): string {
   switch (item.type) {
+    case "item":
+      return item.content.title;
     case "post":
       return item.content.item.title;
     case "review":
@@ -145,7 +151,7 @@ export default function AdminModeration() {
       <header className="mb-6">
         <h1 className="text-2xl font-semibold">Moderación</h1>
         <p className="mt-1 text-sm text-foreground/60">
-          Revisa publicaciones y contenido enviado por la comunidad.
+          Revisa Rankable Items y, si aún existen, registros antiguos que ya estaban pendientes.
         </p>
       </header>
 
@@ -178,6 +184,7 @@ export default function AdminModeration() {
             className="rounded border border-foreground/20 bg-background px-3 py-2"
           >
             <option value="all">Todos</option>
+            <option value="item">Rankable Items</option>
             <option value="post">Publicaciones</option>
             <option value="review">Reseñas</option>
             <option value="comment">Comentarios</option>
@@ -261,6 +268,13 @@ export default function AdminModeration() {
                 <img
                   src={item.content.item.coverUrl}
                   alt={`Portada: ${item.content.item.title}`}
+                  className="mt-3 max-h-64 max-w-full rounded-lg object-cover"
+                />
+              )}
+              {item.type === "item" && item.content.coverUrl && (
+                <img
+                  src={item.content.coverUrl}
+                  alt={`Portada: ${item.content.title}`}
                   className="mt-3 max-h-64 max-w-full rounded-lg object-cover"
                 />
               )}

@@ -75,15 +75,31 @@ export default function ProfileMenu() {
           >
             {LIST_NAME}
           </Link>
+          <Link
+            to="/verification"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-surface"
+          >
+            Verificación de cuenta
+          </Link>
 
           {user.role === "admin" && (
-            <Link
-              to="/admin/moderation"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm hover:bg-surface"
-            >
-              Moderación
-            </Link>
+            <>
+              <Link
+                to="/admin/moderation"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-surface"
+              >
+                Moderación
+              </Link>
+              <Link
+                to="/admin/users"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-surface"
+              >
+                Gestión de usuarios
+              </Link>
+            </>
           )}
 
           <Link

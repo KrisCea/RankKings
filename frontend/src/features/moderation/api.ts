@@ -1,7 +1,7 @@
 import { api } from "../../lib/axios";
 
 export type ModerationStatus = "pending" | "approved" | "rejected";
-export type ModerationContentType = "post" | "review" | "comment" | "media";
+export type ModerationContentType = "item" | "post" | "review" | "comment" | "media";
 export type ModerationTypeFilter = "all" | ModerationContentType;
 
 interface ModerationAuthor {
@@ -27,6 +27,17 @@ export interface ModerationPost extends ModerationEntryBase {
       category: string;
       coverUrl: string | null;
     };
+  };
+}
+
+export interface ModerationItem extends ModerationEntryBase {
+  type: "item";
+  content: {
+    title: string;
+    category: string;
+    description: string;
+    coverUrl: string | null;
+    postId: string;
   };
 }
 
@@ -61,6 +72,7 @@ export interface ModerationMedia extends ModerationEntryBase {
 }
 
 export type ModerationQueueItem =
+  | ModerationItem
   | ModerationPost
   | ModerationReview
   | ModerationComment

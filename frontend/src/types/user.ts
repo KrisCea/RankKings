@@ -1,5 +1,6 @@
 export type UserRole = "user" | "admin";
 export type AccountType = "individual" | "business";
+export type AccountVerificationStatus = "unverified" | "pending" | "verified" | "rejected";
 
 export interface UserSummary {
   id: string;
@@ -7,12 +8,14 @@ export interface UserSummary {
   displayName: string;
   avatarUrl: string;
   accountType: AccountType;
-  isVerifiedBusiness?: boolean;
+  isVerified: boolean;
 }
 
 export interface User extends UserSummary {
   isAuthenticated: boolean;
   role: UserRole;
+  verificationStatus: AccountVerificationStatus;
+  verificationReviewReason: string | null;
 }
 
 export interface UserProfile extends UserSummary {

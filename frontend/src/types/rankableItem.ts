@@ -11,6 +11,7 @@ export interface RankableItem {
   description?: string;
   creator: Creator;
   uploadedBy: string;
+  moderationStatus: "pending" | "approved" | "rejected";
   year?: number;
   coverUrl: string;
   identifiers: Record<string, string>;

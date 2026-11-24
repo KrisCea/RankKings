@@ -12,6 +12,8 @@ const itemDetailPage = lazy(() => import("../pages/ItemPage/ItemPage"));
 const libraryPage = lazy(() => import("../pages/LibraryPage/LibraryPage"));
 const verifyEmailPage = lazy(() => import("../pages/VerifyEmailPage/VerifyEmailPage"));
 const adminModerationPage = lazy(() => import("../pages/AdminModeration/AdminModeration"));
+const adminUsersPage = lazy(() => import("../pages/AdminUsers/AdminUsers"));
+const accountVerificationPage = lazy(() => import("../pages/AccountVerification/AccountVerification"));
 
 function lazyPage(page: ReactElement) {
   return (
@@ -36,6 +38,8 @@ export const router = createBrowserRouter([
       { path: "library", element: lazyPage(createElement(libraryPage)) },
       { path: "verify-email", element: lazyPage(createElement(verifyEmailPage)) },
       { path: "admin/moderation", element: lazyPage(createElement(adminModerationPage)) },
+      { path: "admin/users", element: lazyPage(createElement(adminUsersPage)) },
+      { path: "verification", element: lazyPage(createElement(accountVerificationPage)) },
     ],
   },
 ]);

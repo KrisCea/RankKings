@@ -81,7 +81,7 @@ export default function PostCard({
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
               {post.author.displayName}
-              {post.author.isVerifiedBusiness && (
+              {post.author.isVerified && (
                 <span className="ml-1 text-primary text-xs">●</span>
               )}
             </p>

@@ -28,6 +28,7 @@ import { useRequireAuth } from "../../features/auth/hooks/useRequireAuth";
 import SaveButton from "../../features/items/components/SaveButton";
 import { getErrorMessage } from "../../lib/errors";
 import { deletePost } from "../../features/posts/api";
+import { useCurrentUser } from "../../features/users/hooks/useCurrentUser";
 
 type ItemTab = "reviews" | "children" | "links" | "details";
 
@@ -42,6 +43,7 @@ export default function ItemPage() {
   const [sharePostId, setSharePostId] = useState<string | null>(null);
 
   const { data: item, isLoading, isError } = useItem(id);
+  const { data: currentUser } = useCurrentUser();
   const { data: parent } = useItem(item?.parentId);
   const {
     data: itemPost,
@@ -168,6 +170,12 @@ export default function ItemPage() {
           </div>
         </div>
       </div>
+
+      {item.moderationStatus === "pending" && currentUser?.id === item.uploadedBy && (
+        <p role="status" className="mb-4 rounded-lg border border-foreground/10 bg-surface p-3 text-sm text-foreground/70">
+          Este Rankable Item está pendiente de revisión y aún no es visible para otras personas.
+        </p>
+      )}
 
       {item.description && (
         <p className="mb-4 text-sm text-foreground/80">{item.description}</p>

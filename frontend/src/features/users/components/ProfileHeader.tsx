@@ -33,7 +33,7 @@ export default function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderPr
         <div className="min-w-0 flex-1">
           <h1 className="flex items-center gap-1.5 text-xl font-bold text-foreground">
             <span className="truncate">{profile.displayName}</span>
-            {profile.isVerifiedBusiness && (
+            {profile.isVerified && (
               <BadgeCheck
                 size={18}
                 className="shrink-0 text-primary"

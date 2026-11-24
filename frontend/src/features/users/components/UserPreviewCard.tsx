@@ -29,7 +29,7 @@ export default function UserPreviewCard({ username }: UserPreviewCardProps) {
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">
             {profile.displayName}
-            {profile.isVerifiedBusiness && <span className="ml-1 text-primary">●</span>}
+            {profile.isVerified && <span className="ml-1 text-primary">●</span>}
           </p>
           <p className="text-xs text-foreground/50">@{profile.username}</p>
         </div>
